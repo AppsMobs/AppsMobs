@@ -1,0 +1,16 @@
+{
+  "name": "appsmobs-pro",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "devDependencies": {
+    "electron": "^31.3.1"
+  }
+}
+
+

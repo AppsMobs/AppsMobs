@@ -1,0 +1,50 @@
+# BootyBot - Requirements
+# Application de contrôle Android via scrcpy et ADB
+
+# Gestion du streaming Android
+# scrcpy-client pour Python 3.9 (requiert adbutils>=1.0.8)
+scrcpy-client==0.4.7
+adbutils==1.2.15
+
+# PyAV pour scrcpy (version compatible avec scrcpy-client et Python 3.9)
+av==12.0.0
+
+# Traitement d'images et vision par ordinateur
+opencv-python==4.7.0.72
+numpy==1.24.2
+
+# OCR (reconnaissance de texte)
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# Interface graphique (Tkinter est inclus avec Python)
+# tkinter - déjà inclus dans Python
+
+# Utilitaires
+requests>=2.31.0
+
+# ============================================================================
+# SYSTÈME D'AUTHENTIFICATION ET SÉCURITÉ
+# ============================================================================
+
+# API Web et serveur
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Authentification JWT
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# Base de données
+psycopg2-binary>=2.9.7
+supabase>=2.0.0
+
+# Validation des données
+pydantic[email]>=2.5.0
+
+# Sécurité SSL/TLS
+urllib3>=2.0.0
+
+# Gestion des variables d'environnement
+python-dotenv>=1.0.0
+

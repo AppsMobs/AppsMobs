@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none';">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: file:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self';">
+  <title>AppsMobs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-overlay"></div>
+  
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand" style="text-align:center;"><span id="sidebar-version" style="color:#8aa7bd;font-weight:600;">v1.1.10</span></div>
+    <div class="nav-grid">
+      <button class="nav-card nav-btn active" data-section="devices" title="Dashboard">
+        <div class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">dashboard</span></div>
+        <div class="nav-label">Dashboard</div>
+      </button>
+      <button class="nav-card nav-btn" data-section="scripts" title="Scripts">
+        <div class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">code</span></div>
+        <div class="nav-label">Scripts</div>
+      </button>
+      <button class="nav-card nav-btn" data-section="control" title="Control">
+        <div class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">tune</span></div>
+        <div class="nav-label">Control</div>
+      </button>
+      <button class="nav-card nav-btn" data-section="editor" title="Playground">
+        <div class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">science</span></div>
+        <div class="nav-label">Playground</div>
+      </button>
+      <button class="nav-card nav-btn" data-section="console" title="Console">
+        <div class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">terminal</span></div>
+        <div class="nav-label">Console</div>
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="icon-btn nav-btn" data-section="settings" title="Paramètres" aria-label="Paramètres">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <button class="icon-btn nav-btn" data-section="profile" title="Profil" aria-label="Profil">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Header -->
+    <div class="header">
+      <div class="header-brand-glass" id="header-main-logo">
+        <img src="../../assets/icons/Logo.png" alt="AppsMobs" class="header-logo" />
+        <span class="header-main-title">AppsMobs Pro</span>
+      </div>
+      <div class="actions">
+        <button class="btn btn-gradient btn-sm" id="refresh-btn">🔄 Actualiser</button>
+        <div class="status" id="status">● Prêt</div>
+        <div id="license-indicator"></div>
+      </div>
+    </div>
+
+    <!-- License Warning Banner -->
+    <div class="license-warning hidden" id="license-warning">
+      <div class="warning-content">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-text">
+          <strong>License Required:</strong> A valid license is required to use the console and run scripts.
+        </div>
+        <button class="btn btn-modern btn-sm" id="activate-license-banner-btn">Activate License</button>
+      </div>
+    </div>
+
+    
+
+    <!-- Dashboard Section -->
+    <div class="content-section" id="devices-section">
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📱</div>
+          <div class="stat-content">
+            <div class="stat-number" id="devices-count">0</div>
+            <div class="stat-label">Appareils Connectés</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📜</div>
+          <div class="stat-content">
+            <div class="stat-number" id="scripts-count">0</div>
+            <div class="stat-label">Scripts Chargés</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">▶️</div>
+          <div class="stat-content">
+            <div class="stat-number" id="running-count">0</div>
+            <div class="stat-label">Scripts Actifs</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-content">
+            <div class="stat-number" id="actions-count">4</div>
+            <div class="stat-label">Actions Disponibles</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Cards -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📱 Appareils Connectés</h3>
+          <div class="card-actions">
+            <input type="text" class="search-input" id="devices-search" placeholder="Rechercher un appareil..." style="width:220px;">
+            <button class="btn btn-icon btn-sm" id="devices-search-btn"><span class="material-symbols-outlined">search</span></button>
+            <button class="btn btn-modern btn-refresh" id="refresh-btn"><span class="material-symbols-outlined">refresh</span><span class="refresh-label">Actualiser</span></button>
+          </div>
+        </div>
+        <div class="devices-grid" id="devices-grid">
+          <!-- Device cards will be populated here -->
+        </div>
+      </div>
+
+      <!-- Scripts Overview -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📜 Scripts Disponibles</h3>
+          <div class="card-actions">
+            <input type="text" class="search-input" id="scripts-search" placeholder="Rechercher un script..." style="width:220px;">
+            <button class="btn btn-icon btn-sm" id="scripts-search-btn"><span class="material-symbols-outlined">search</span></button>
+            <button class="btn btn-modern btn-refresh" id="reload-scripts-btn">🔄 Recharger</button>
+          </div>
+        </div>
+        <div class="scripts-grid" id="scripts-grid">
+          <!-- Script cards will be populated here -->
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>⚡ Actions Rapides</h3>
+        </div>
+        <div class="actions-grid">
+          <!-- Bouton 1 -->
+          <div class="stat-card action-quick" id="run-selected-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">playlist_play</span>
+            </div>
+            <div class="stat-label">Lancer sur sélectionnés</div>
+          </div>
+          <!-- Bouton 2 -->
+          <div class="stat-card action-quick" id="run-all-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">play_circle</span>
+            </div>
+            <div class="stat-label">Lancer sur TOUS</div>
+          </div>
+          <!-- Bouton 3 (stop/rouge) -->
+          <div class="stat-card action-quick stop" id="stop-all-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">stop_circle</span>
+            </div>
+            <div class="stat-label">Arrêter tout</div>
+          </div>
+          <!-- Bouton 4 -->
+          <div class="stat-card action-quick" id="screenshot-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">photo_camera</span>
+            </div>
+            <div class="stat-label">Capture écran</div>
+          </div>
+          <!-- Bouton 5 -->
+          <div class="stat-card action-quick" id="scrcpy-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">screen_share</span>
+            </div>
+            <div class="stat-label">Ouvrir scrcpy</div>
+          </div>
+          <!-- Bouton 6 -->
+          <div class="stat-card action-quick" id="report-btn">
+            <div class="stat-icon">
+              <span class="material-symbols-outlined">description</span>
+            </div>
+            <div class="stat-label">Rapport</div>
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <!-- Console Section -->
+    <div class="content-section hidden" id="console-section">
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📝 Console de Debug</h3>
+          <div class="card-actions">
+            <button class="btn btn-gradient btn-sm" id="clear-console-btn">🗑️ Effacer</button>
+            <button class="btn btn-gradient btn-sm" id="export-logs-btn">📋 Exporter</button>
+          </div>
+        </div>
+        <div class="console-container">
+          <pre id="console-output"></pre>
+        </div>
+      </div>
+      <!-- Per-device consoles docked inside console section only -->
+      <div class="console-dock" id="console-dock"></div>
+    </div>
+
+    <!-- Control Section -->
+    <div class="content-section hidden" id="control-section">
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📱 Appareils</h3>
+          <div class="card-actions">
+            <input type="text" class="search-input" id="control-devices-search" placeholder="Rechercher un appareil..." style="width:220px;">
+            <button class="btn btn-icon btn-sm" id="control-devices-search-btn"><span class="material-symbols-outlined">search</span></button>
+            <button class="btn btn-modern btn-refresh" id="control-refresh-btn"><span class="material-symbols-outlined">refresh</span><span class="refresh-label">Actualiser</span></button>
+          </div>
+        </div>
+        <div class="devices-grid" id="control-devices-grid"></div>
+      </div>
+
+      <!-- Contrôles Appareil - Refonte complète -->
+      <div class="card glass control-master">
+        <div class="card-header">
+          <h3><span class="material-symbols-outlined">tune</span> Contrôles Appareil</h3>
+        </div>
+
+        <!-- Section Système -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="material-symbols-outlined section-icon">settings</span>
+            <h4>Système</h4>
+          </div>
+          <div class="control-buttons-grid">
+            <button class="control-btn premium" id="ctrl-poweroff">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">power_settings_new</span></div>
+              <div class="btn-label">Éteindre</div>
+            </button>
+            <button class="control-btn premium" id="ctrl-reboot">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">restart_alt</span></div>
+              <div class="btn-label">Redémarrer</div>
+            </button>
+            <button class="control-btn premium" id="ctrl-screen">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">phone_android</span></div>
+              <div class="btn-label">Écran</div>
+            </button>
+            <button class="control-btn premium" id="ctrl-airplane-on">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">airplanemode_active</span></div>
+              <div class="btn-label">Mode avion ON</div>
+            </button>
+            <button class="control-btn premium" id="ctrl-airplane-off">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">airplanemode_inactive</span></div>
+              <div class="btn-label">Mode avion OFF</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rangée: Audio + Affichage -->
+        <div class="control-row">
+          <!-- Section Audio -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="material-symbols-outlined section-icon">volume_up</span>
+              <h4>Audio</h4>
+            </div>
+            <div class="control-buttons-grid">
+              <div class="control-slider-card">
+                <div class="slider-header">
+                  <span class="material-symbols-outlined slider-icon">volume_up</span>
+                  <span class="slider-label" for="volume">Volume</span>
+                  <span class="slider-value" id="volume-value">7</span>
+                </div>
+                <input type="range" id="volume-slider" min="0" max="15" value="7" class="slider-premium volume">
+                <div class="slider-minmax"><span>0</span><span>15</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Affichage -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="material-symbols-outlined section-icon">brightness_6</span>
+              <h4>Affichage</h4>
+            </div>
+            <div class="control-buttons-grid">
+              <div class="control-slider-card">
+                <div class="slider-header">
+                  <span class="material-symbols-outlined slider-icon">brightness_6</span>
+                  <span class="slider-label" for="brightness">Luminosité</span>
+                  <span class="slider-value" id="brightness-value">128</span>
+                </div>
+                <input type="range" id="brightness-slider" min="0" max="255" value="128" class="slider-premium brightness">
+                <div class="slider-minmax"><span>0</span><span>255</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Actions -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="material-symbols-outlined section-icon">touch_app</span>
+            <h4>Actions</h4>
+          </div>
+          <div class="control-buttons-grid">
+            <button class="control-btn action" id="ctrl-screenshot">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">photo_camera</span></div>
+              <div class="btn-label">Capture</div>
+            </button>
+            <button class="control-btn action" id="ctrl-scrcpy">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">screen_share</span></div>
+              <div class="btn-label">Scrcpy</div>
+            </button>
+            <button class="control-btn action" id="ctrl-mute">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">volume_off</span></div>
+              <div class="btn-label">Mute</div>
+            </button>
+            <button class="control-btn action" id="ctrl-wifi-on">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">wifi</span></div>
+              <div class="btn-label">Wi‑Fi ON</div>
+            </button>
+            <button class="control-btn action" id="ctrl-wifi-off">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">wifi_off</span></div>
+              <div class="btn-label">Wi‑Fi OFF</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Navigation Android -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="material-symbols-outlined section-icon">arrow_back</span>
+            <h4>Navigation Android</h4>
+          </div>
+          <div class="control-buttons-grid">
+            <button class="control-btn action" id="ctrl-nav-back">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">arrow_back</span></div>
+              <div class="btn-label">Retour</div>
+            </button>
+            <button class="control-btn action" id="ctrl-nav-home">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">home</span></div>
+              <div class="btn-label">Accueil</div>
+            </button>
+            <button class="control-btn action" id="ctrl-nav-recent">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">apps</span></div>
+              <div class="btn-label">Récents</div>
+            </button>
+            <button class="control-btn action" id="ctrl-nav-menu">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">menu</span></div>
+              <div class="btn-label">Menu</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts Section -->
+    <div class="content-section hidden" id="scripts-section">
+      <!-- Scripts Overview -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📜 Scripts Disponibles</h3>
+          <div class="card-actions">
+            <input type="text" class="search-input" id="scripts-search-section" placeholder="Rechercher..." style="width:160px;padding:8px 10px;">
+            <button class="btn btn-icon btn-sm" id="scripts-search-btn-section"><span class="material-symbols-outlined">search</span></button>
+            <button class="btn btn-modern btn-refresh" id="reload-scripts-btn-section">🔄 Recharger</button>
+          </div>
+        </div>
+        <div class="scripts-grid" id="scripts-grid-section">
+          <!-- Script cards will be populated here -->
+        </div>
+      </div>
+
+      <!-- Script Management -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>⚙️ Gestion des Scripts</h3>
+        </div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>Dossier scripts</label>
+            <div class="path-input">
+              <input type="text" id="scripts-path-section" placeholder="scripts (dossier de l'application)" readonly>
+              <button class="btn btn-sm" id="browse-scripts-section">📁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Script Details & Actions -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>🧾 Détails du Script</h3>
+        </div>
+        <div id="script-detail" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;">
+          <div>
+            <div><strong for="name">Nom:</strong> <span id="sd-name">—</span></div>
+            <div><strong for="version">Version:</strong> <span id="sd-version">—</span></div>
+            <div><strong for="duration">Durée max:</strong> <span id="sd-duration">—</span></div>
+            <div><strong for="file">Fichier:</strong> <span id="sd-file">—</span></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="control-btn action" id="script-open-editor">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">edit</span></div>
+              <div class="btn-label">Ouvrir éditeur</div>
+            </button>
+            <button class="control-btn action" id="script-run-selection">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">play_circle</span></div>
+              <div class="btn-label">Lancer sur sélection</div>
+            </button>
+            <button class="control-btn action" id="script-duplicate">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">content_copy</span></div>
+              <div class="btn-label">Dupliquer</div>
+            </button>
+            <button class="control-btn premium" id="script-delete">
+              <div class="btn-icon-wrapper"><span class="material-symbols-outlined">delete</span></div>
+              <div class="btn-label">Supprimer</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="content-section hidden" id="settings-section">
+      <!-- General Settings -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>⚙️ Paramètres Généraux</h3>
+        </div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>Auto-refresh appareils</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="auto-refresh" checked>
+              <span class="slider"></span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Mode debug</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="debug-mode">
+              <span class="slider"></span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Alertes sonores</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="sound-alerts" checked>
+              <span class="slider"></span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Thème sombre</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="dark-theme" checked>
+              <span class="slider"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrcpy Settings -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>📱 Paramètres Scrcpy</h3>
+        </div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>FPS Max</label>
+            <div class="slider-container">
+              <input type="range" id="scrcpy-fps" min="5" max="60" value="15" class="range-slider">
+              <span class="slider-value" id="fps-value">15</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Bitrate (Mbps)</label>
+            <div class="slider-container">
+              <input type="range" id="scrcpy-bitrate" min="1" max="20" value="8" class="range-slider">
+              <span class="slider-value" id="bitrate-value">8</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Largeur max</label>
+            <div class="slider-container">
+              <input type="range" id="scrcpy-width" min="480" max="1920" value="1080" class="range-slider">
+              <span class="slider-value" id="width-value">1080</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- License Settings -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>🔑 Gestion Licence</h3>
+        </div>
+        <div class="license-section">
+          <div class="license-status" id="license-status">
+            <div class="status-indicator" id="status-indicator"></div>
+            <span id="license-text">Vérification...</span>
+          </div>
+          <button class="btn btn-gradient" id="activate-license-btn">🔑 Activer Licence</button>
+          <button class="btn btn-gradient" id="check-license-btn">🔄 Vérifier Licence</button>
+        </div>
+      </div>
+
+      <!-- Advanced Settings -->
+      <div class="card glass">
+        <div class="card-header">
+          <h3>🔧 Paramètres Avancés</h3>
+        </div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>Niveau de log</label>
+            <select id="log-level" class="setting-select">
+              <option value="DEBUG">Debug</option>
+              <option value="INFO" selected>Info</option>
+              <option value="WARNING">Warning</option>
+              <option value="ERROR">Error</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>Dossier scripts</label>
+            <div class="path-input">
+              <input type="text" id="scripts-path" placeholder="scripts (dossier de l'application)" readonly>
+              <button class="btn btn-sm" id="browse-scripts">📁</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Dossier captures</label>
+            <div class="path-input">
+              <input type="text" id="screenshots-path" placeholder="screenshots (dossier de l'application)" readonly>
+              <button class="btn btn-sm" id="browse-screenshots">📁</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label for="select-language" id="label-language"></label>
+            <select id="select-language" style="width:150px;">
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrcpy Selection Modal -->
+    <div class="modal-overlay hidden" id="scrcpy-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>📱 Ouvrir Scrcpy</h2>
+          <button class="modal-close" id="close-scrcpy-modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>Sélectionnez l'appareil pour lequel ouvrir Scrcpy :</p>
+          <div class="device-selection-list" id="device-selection-list">
+            <!-- Device options will be populated here -->
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-modern" id="cancel-scrcpy">Annuler</button>
+            <button class="btn btn-modern selected" id="confirm-scrcpy">Ouvrir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- License Activation Modal -->
+    <div class="modal-overlay hidden" id="license-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🔑 Activation Licence</h2>
+          <button class="modal-close" id="close-license-modal">✕</button>
+        </div>
+        <div class="login-form">
+          <div class="input-group">
+            <div class="input-icon">👤</div>
+            <div class="input-content">
+              <label>Email</label>
+              <input type="email" id="license-email" placeholder="votre@email.com">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-icon">🔑</div>
+            <div class="input-content">
+              <label>Clé de licence</label>
+              <input type="password" id="license-key" placeholder="••••••••••••••••">
+            </div>
+          </div>
+          <button class="btn btn-gradient btn-large" id="submit-license">LOGIN</button>
+          <div class="signup-link">
+            <span>first time here? </span>
+            <a href="https://appsmobs.com" target="_blank" class="signup-link-text">sign up!</a>
+          </div>
+          <div class="license-status-text" id="license-status-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script Editor Section -->
+    <div class="content-section hidden" id="editor-section">
+      <iframe id="script-editor-iframe" src="script-editor.html"></iframe>
+    </div>
+    <!-- Dynamic per-device consoles -->
+    <div class="console-dock" id="console-dock"></div>
+  </main>
+
+  <script src="renderer.js"></script>
+  <script src="iframe-communication.js"></script>
+</body>
+</html>

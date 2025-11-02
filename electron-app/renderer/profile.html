@@ -1,0 +1,106 @@
+<div class="card glass profile-card">
+  <div class="card-header">
+    <h3>👤 Mon Profil</h3>
+  </div>
+  <div class="card-body">
+    <form id="profileForm">
+      <div class="profile-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <label class="label" for="firstName" style="font-weight:600;margin-bottom:6px;display:block;color:#e2e8f0;">Prénom</label>
+          <input class="input" id="firstName" type="text" placeholder="Prénom" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,232,255,.25);background:rgba(30,41,59,.7);color:#e2e8f0;">
+        </div>
+        <div>
+          <label class="label" for="lastName" style="font-weight:600;margin-bottom:6px;display:block;color:#e2e8f0;">Nom</label>
+          <input class="input" id="lastName" type="text" placeholder="Nom" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,232,255,.25);background:rgba(30,41,59,.7);color:#e2e8f0;">
+        </div>
+        <div>
+          <label class="label" for="email" style="font-weight:600;margin-bottom:6px;display:block;color:#e2e8f0;">Email</label>
+          <input class="input" id="email" type="email" placeholder="email" readonly style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,232,255,.25);background:rgba(30,41,59,.35);color:#cbd5e1;">
+        </div>
+        <div>
+          <label class="label" for="country" style="font-weight:600;margin-bottom:6px;display:block;color:#e2e8f0;">Pays</label>
+          <input class="input" id="country" type="text" placeholder="Pays" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,232,255,.25);background:rgba(30,41,59,.7);color:#e2e8f0;">
+        </div>
+      </div>
+      <div class="profile-actions" style="display:flex;gap:12px;justify-content:flex-end;margin-top:14px;">
+        <button type="submit" class="btn btn-gradient" style="border-radius:9999px;padding:12px 18px;">💾 Sauvegarder</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card glass profile-card" style="margin-top:16px;">
+  <div class="card-header">
+    <h3>🔐 Licence</h3>
+  </div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;">
+      <div>
+        <div style="color:#94a3b8;font-size:.9rem;">Type de plan</div>
+        <div id="lic-plan" style="font-weight:700;font-size:1.1rem;">-</div>
+      </div>
+      <div>
+        <div style="color:#94a3b8;font-size:.9rem;">Jours restants</div>
+        <div id="lic-remaining" style="font-weight:700;font-size:1.1rem;">-</div>
+      </div>
+    </div>
+    <div class="profile-actions" style="display:flex;gap:12px;justify-content:flex-end;margin-top:14px;">
+      <a href="https://www.appsmobs.com/pricing" target="_blank" rel="noopener">
+        <button type="button" class="btn btn-gradient" style="border-radius:9999px;padding:12px 18px;background:linear-gradient(90deg,#34d399,#22c55e);color:#062312;">🔁 Renouveler</button>
+      </a>
+    </div>
+  </div>
+  
+</div>
+<script>
+  (function(){
+    function getAuthEmail(){
+      try{ const saved = localStorage.getItem('appsMobs_auth'); if(saved){ const d = JSON.parse(saved); return d.email || ''; } }catch{}
+      return '';
+    }
+    const root = document.currentScript.parentElement;
+    const emailEl = root.querySelector('#email');
+    if (emailEl) emailEl.value = getAuthEmail();
+    
+    // Charger infos licence
+    (async () => {
+      try {
+        const saved = localStorage.getItem('appsMobs_auth');
+        if (saved) {
+          const d = JSON.parse(saved);
+          if (d.email && d.licenseKey && window.electronAPI && window.electronAPI.verifyLicense) {
+            const res = await window.electronAPI.verifyLicense(d.email, d.licenseKey);
+            if (res && res.success) {
+              const planEl = root.querySelector('#lic-plan');
+              const remEl = root.querySelector('#lic-remaining');
+              if (planEl) planEl.textContent = (res.plan || '-').toUpperCase();
+              if (remEl) {
+                if (res.expires_at) {
+                  const now = Math.floor(Date.now()/1000);
+                  const days = Math.max(0, Math.floor((res.expires_at - now) / 86400));
+                  remEl.textContent = `${days} jour(s)`;
+                } else {
+                  remEl.textContent = '-';
+                }
+              }
+            }
+          }
+        }
+      } catch {}
+    })();
+
+    root.querySelector('#profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: root.querySelector('#email').value.trim(),
+        first_name: root.querySelector('#firstName').value.trim() || null,
+        last_name: root.querySelector('#lastName').value.trim() || null,
+        country: root.querySelector('#country').value.trim() || null,
+      };
+      if (!payload.email) { alert('Email manquant'); return; }
+      if (!window.electronAPI || !window.electronAPI.saveUserProfile){ alert('API indisponible'); return; }
+      const res = await window.electronAPI.saveUserProfile(payload);
+      if (res && res.success){ alert('Profil sauvegardé'); } else { alert('Erreur: ' + (res && res.message ? res.message : 'inconnue')); }
+    });
+  })();
+</script>

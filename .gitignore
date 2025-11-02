@@ -1,0 +1,181 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+*.exe
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environnements virtuels
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Configuration & Secrets (NE JAMAIS COMMITER)
+config.ini
+secrets.json
+.env
+.env.local
+.env.production
+.env.development
+*.env
+config.json
+credentials.json
+
+# Logs
+*.log
+logs/
+combined.log
+error.log
+
+# Builds & Distributions
+*.exe
+*.msi
+*.dmg
+*.pkg
+BootyBot.exe
+dist/
+build/
+*.whl
+
+# Données temporaires
+*.tmp
+*.bak
+*.cache
+temp/
+tmp/
+*.cache
+
+# Images temporaires & Screenshots
+last_frame.png
+screenshots/
+
+# Node modules (déjà géré mais on s'assure)
+node_modules/
+package-lock.json
+
+# Fichiers de développement (à supprimer)
+*.bat
+*.ps1
+*_GUIDE.md
+*_INSTRUCTIONS*.md
+*_SETUP*.md
+*_CONFIG*.md
+*_TEST*.md
+DEMARRER*.bat
+START*.bat
+RESET*.bat
+INSTALL*.bat
+TEST*.bat
+*.example
+config.env.example
+config.json.example
+
+# Documentation interne/technique (garder seulement README.md et LICENSE.md)
+ANALYSE*.md
+ARCHITECTURE*.md
+PLAN*.md
+ETAPE*.md
+GUIDE*.md
+INSTRUCTIONS*.txt
+PROCÉDURE*.md
+FLUX*.md
+SOLUTION*.md
+RECAP*.md
+RÉSUMÉ*.md
+FEATURES*.md
+SECURITY*.md
+TROUVER*.md
+INTEGRATION*.md
+SETUP*.md
+QUICKSTART*.md
+DEMARRAGE*.txt
+
+# Fichiers de développement temporaires
+extract_scrcpy.py
+protect_code.py
+test_installation.py
+start_auth_system.py
+
+# Discord bot (si non utilisé en prod)
+discord-bot/
+
+# Dashboard Next.js (si non utilisé)
+dashboard/
+
+# Electron app old (garder seulement la version active)
+electron-app/main_old.js
+
+# Système
+Thumbs.db
+desktop.ini
+
+# Sécurité
+*.key
+*.pem
+*.p12
+
+# Website - fichiers de dev
+website/dist/
+website/node_modules/
+website/auth-backend/node_modules/
+website/auth-backend/*.log
+website/auth-backend/website/
+
+# Fichiers SQL de test (garder seulement les migrations nécessaires)
+website/auth-backend/*_TEST*.sql
+website/auth-backend/test_*.js
+website/auth-backend/*_EXAMPLE*.sql
+
+# Documentation technique interne
+website/auth-backend/*_CONFIG*.md
+website/auth-backend/*_GUIDE*.md
+website/auth-backend/*_INSTRUCTIONS*.md
+website/auth-backend/*_DEBUG*.md
+website/auth-backend/*_DEPANNAGE*.md
+website/auth-backend/*_VERIFIER*.md
+website/auth-backend/*_SOLUTION*.md
+website/auth-backend/*_MIGRER*.md
+website/auth-backend/*_ETAPES*.md
+website/auth-backend/*_AVERTISSEMENT*.md
+website/auth-backend/*_RECUPERER*.md
+website/auth-backend/*_UPDATE*.ps1
+website/auth-backend/*_CREER*.bat
+website/*_GUIDE*.md
+website/*_TEST*.md
+website/*_ETAPES*.md
+website/*_MANQUANT*.md
+website/*_RECAPTCHA*.md
+website/SEO_GUIDE.md
+website/CHAT_AI_IMPROVEMENTS.md
+

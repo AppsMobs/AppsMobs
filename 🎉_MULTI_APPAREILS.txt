@@ -1,0 +1,62 @@
+╔════════════════════════════════════════════════════════════════╗
+║         ✅ FONCTIONNALITÉ MULTI-APPAREILS CRÉÉE !             ║
+╚════════════════════════════════════════════════════════════════╝
+
+🎉 NOUVEAU: Vous pouvez maintenant exécuter vos scripts sur 
+   PLUSIEURS téléphones SIMULTANÉMENT !
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 LANCER L'INTERFACE MULTI-APPAREILS:
+
+Python:
+python run_multi_device.py
+
+OU double-cliquez sur: START_MULTI.bat
+
+═══════════════════════════════════════════════════════════════════
+
+📝 CRÉER VOS SCRIPTS:
+
+1. Créez un fichier dans: scripts/mon_script.py
+2. Copiez la structure de: scripts/example_script.py
+3. Écrivez votre code dans la fonction my_script()
+4. Définissez SCRIPT_INFO avec les infos du script
+
+Lisez SCRIPTS_GUIDE.md pour tout comprendre !
+
+═══════════════════════════════════════════════════════════════════
+
+✅ CE QUE VOUS POUVEZ FAIRE:
+
+- Connecter plusieurs téléphones (jusqu'à 10+)
+- Exécuter vos scripts sur tous en même temps
+- Voir le statut de chaque téléphone
+- Accéder à tous les outils (clic, swipe, texte, etc.)
+
+═══════════════════════════════════════════════════════════════════
+
+📁 FICHIERS CRÉÉS:
+
+- scripts/                   ← Mettez vos scripts ici
+- scripts/example_script.py  ← Exemple de script
+- core/multi_device_manager.py ← Gestion multi-appareils
+- ui/multi_device_gui.py     ← Interface graphique
+- run_multi_device.py        ← Lance l'interface multi
+- START_MULTI.bat           ← Double-clic pour lancer
+- SCRIPTS_GUIDE.md          ← Guide complet
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 UTILISATION RAPIDE:
+
+1. Connectez vos téléphones Android (via USB)
+2. Lancez: python run_multi_device.py
+3. Cliquez "Actualiser" → Appareils apparaissent
+4. Sélectionnez les appareils → "Configurer sélectionnés"
+5. Choisissez votre script → "Lancer sur TOUS"
+
+═══════════════════════════════════════════════════════════════════
+
+**LISEZ SCRIPTS_GUIDE.md POUR TOUS LES DÉTAILS !** 📚
+

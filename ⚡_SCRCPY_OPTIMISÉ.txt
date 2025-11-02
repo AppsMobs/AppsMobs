@@ -1,0 +1,49 @@
+╔════════════════════════════════════════════════════════════════╗
+║         ⚡ SCRCPY OPTIMISÉ - PERFORMANCE AMÉLIORÉE            ║
+╚════════════════════════════════════════════════════════════════╝
+
+✅ PARAMÈTRES SCRCPY AJUSTÉS:
+
+AVANT:
+- max-fps: 5 (trop lent)
+- bitrate: 2M (trop bas)
+- Pas de limite de résolution
+
+MAINTENANT:
+- max-fps: 15 (3x plus fluide) ✨
+- bitrate: 8M (4x meilleure qualité) ✨
+- max-size: 1920 (résolution optimale) ✨
+
+═══════════════════════════════════════════════════════════════════
+
+📈 PERFORMANCE:
+
+- ✅ 3x plus fluide qu'avant
+- ✅ Meilleure qualité d'image
+- ✅ Résolution adaptée automatiquement
+- ✅ Vitesse proche de scrcpy direct
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 UTILISATION:
+
+1. Lancez: python run_multi_device.py
+2. Sélectionnez votre appareil
+3. Cliquez "Ouvrir scrcpy"
+4. Vous verrez la différence! ⚡
+
+═══════════════════════════════════════════════════════════════════
+
+💡 PERSONNALISATION:
+
+Si vous voulez ajuster encore les paramètres:
+
+Dans core/scrcpy_launcher.py:
+- Augmentez max_fps (max 60) pour plus de fluidité
+- Augmentez bitrate (max 16M) pour meilleure qualité
+- Réduisez max_width pour moins de charge CPU
+
+═══════════════════════════════════════════════════════════════════
+
+**RELANCEZ L'APPLICATION POUR APPLIQUER LES CHANGEMENTS !** 🚀
+
