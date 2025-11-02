@@ -84,13 +84,14 @@ screenshots/
 node_modules/
 package-lock.json
 
-# Code source propriétaire (à EXCLURE du repo public pour modèle commercial)
-# Décommenter ces lignes si vous voulez garder le code source 100% privé :
-# core/
-# ui/
-# run_app.py
-# run_multi_device.py
-# run_pro.py
+# Code source propriétaire (EXCLU du repo public - modèle commercial)
+core/
+ui/
+run_app.py
+run_multi_device.py
+run_pro.py
+core/**/*
+ui/**/*
 
 # Fichiers de développement (optionnel - peut être gardé pour docs)
 # *.bat

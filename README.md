@@ -141,12 +141,12 @@ appsmobs/
 │
 ├── scripts/          # 📝 Example automation scripts
 ├── installer/        # 📦 Build scripts for Windows installer
-├── docs/             # 📚 Documentation (if added)
+├── assets/           # 🎨 Icons and resources
 │
 └── [Other files]     # Build tools and examples
 ```
 
-> **Note**: Core application source code (`core/`, `ui/`) may be limited or excluded from this public repository as it's proprietary software.
+> ⚠️ **Note**: The core application source code (`core/`, `ui/`) is **proprietary and excluded** from this public repository. Only the compiled Windows executable (.exe) is distributed to customers.
 
 ## 💡 About This Repository
 
@@ -161,10 +161,13 @@ This GitHub repository serves as:
 
 **This repository is for DOCUMENTATION and PROMOTION purposes.**
 
-- The **compiled Windows application (.exe)** is distributed separately
-- The **core application source code** is proprietary and not fully available here
-- Download the ready-to-use installer from [appsmobs.com/download](https://appsmobs.com/download)
-- No Python knowledge or development setup required - just download and install!
+- ✅ **Compiled Windows application (.exe)** - Download from [appsmobs.com/download](https://appsmobs.com/download)
+- ❌ **Core application source code** - Proprietary, not available here
+- ✅ **Website source** - Public (marketing and license management)
+- ✅ **Example scripts** - Public examples for users
+- ❌ **Build tools** - Proprietary compilation process
+
+**For Users**: No Python knowledge or development setup required - just download the .exe and install!
 
 **Why use the .exe?**
 - ✅ Pre-compiled and optimized
