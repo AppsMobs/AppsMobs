@@ -1,10 +1,15 @@
 # AppsMobs - Android Automation Made Easy 🚀
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
-[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-green.svg)](https://www.python.org/)
+[![Download](https://img.shields.io/badge/Download-Latest-brightgreen)](https://appsmobs.com/download)
+[![Website](https://img.shields.io/badge/Website-appsmobs.com-cyan)](https://appsmobs.com)
+[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE.md)
 
 > **Professional Android automation tool for Windows** - Control multiple devices, create Python scripts, and automate tasks with ease.
+
+**🎯 Get Started**: Download the Windows installer (.exe) from [appsmobs.com/download](https://appsmobs.com/download)
+
+> ⚠️ **Commercial Software**: AppsMobs is proprietary software distributed as a compiled Windows executable. This repository contains documentation, website source, and build tools - not the full application source code.
 
 ## ✨ Features
 
@@ -26,11 +31,14 @@
 
 ## 🚀 Quick Start
 
-### Installation
+### Download & Install
 
-1. Download the Windows installer from [our website](https://appsmobs.com/download)
-2. Run the installer and follow the setup wizard
-3. Launch AppsMobs and connect your Android device
+1. **Download**: Get the Windows installer from [appsmobs.com/download](https://appsmobs.com/download)
+2. **Install**: Run the installer and follow the setup wizard
+3. **Launch**: Start AppsMobs and connect your Android device
+4. **License**: Get a free trial license from [appsmobs.com/shop](https://appsmobs.com/shop)
+
+> 💡 **Note**: AppsMobs is distributed as a compiled Windows executable (.exe). No Python installation or coding knowledge required!
 
 ### Connect Your Device
 
@@ -117,38 +125,66 @@ AppsMobs provides 35+ automation functions:
 
 [View full API documentation →](https://appsmobs.com/docs/playground)
 
-## 📁 Project Structure
+## 📁 Repository Structure
+
+This repository contains:
 
 ```
-BootyBot/
-├── core/              # Core automation functions
-├── ui/                # GUI interface
-├── scripts/           # Example scripts
-├── installer/         # Installation scripts
-└── website/           # Web platform (licensing)
+appsmobs/
+├── README.md          # This file - Documentation and marketing
+├── LICENSE.md         # Proprietary license terms
+├── CONTRIBUTING.md    # Guidelines for issues/feedback
+│
+├── website/           # 🌐 Freemium website (public)
+│   ├── src/          # React frontend
+│   └── auth-backend/ # License management API
+│
+├── scripts/          # 📝 Example automation scripts
+├── installer/        # 📦 Build scripts for Windows installer
+├── docs/             # 📚 Documentation (if added)
+│
+└── [Other files]     # Build tools and examples
 ```
 
-## 🤝 Contributing
+> **Note**: Core application source code (`core/`, `ui/`) may be limited or excluded from this public repository as it's proprietary software.
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+## 💡 About This Repository
 
-### Development Setup
+This GitHub repository serves as:
+- 📚 **Documentation Hub** - Complete user guides, API references, and tutorials
+- 🌐 **Website Source** - Marketing platform and license management system
+- 📦 **Build Tools** - Scripts and tools for creating the Windows installer
+- 🔧 **Examples** - Sample scripts and configuration files
+- 🎯 **Marketing** - Professional showcase of AppsMobs capabilities
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/appsmobs.git
-cd appsmobs
+### ⚠️ Important Notice
 
-# Install dependencies
-pip install -r requirements.txt
+**This repository is for DOCUMENTATION and PROMOTION purposes.**
 
-# Run development version
-python run_app.py
-```
+- The **compiled Windows application (.exe)** is distributed separately
+- The **core application source code** is proprietary and not fully available here
+- Download the ready-to-use installer from [appsmobs.com/download](https://appsmobs.com/download)
+- No Python knowledge or development setup required - just download and install!
+
+**Why use the .exe?**
+- ✅ Pre-compiled and optimized
+- ✅ No setup or dependencies needed
+- ✅ Professional installation experience
+- ✅ Automatic updates available
+- ✅ Full support included
+
+## 🤝 Support & Feedback
+
+- 🐛 **Report Issues**: Use [GitHub Issues](https://github.com/VOTRE_USERNAME/appsmobs/issues)
+- 💬 **Get Help**: Visit [appsmobs.com/faq](https://appsmobs.com/faq)
+- 💡 **Suggest Features**: Open a feature request on GitHub
+- 📧 **Contact**: support@appsmobs.com
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+AppsMobs is proprietary software. See [LICENSE.md](LICENSE.md) for details.
+
+> ⚠️ **Important**: This repository is for documentation and website purposes. The core application source code is proprietary.
 
 ## 🌐 Links
 

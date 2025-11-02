@@ -84,9 +84,18 @@ screenshots/
 node_modules/
 package-lock.json
 
-# Fichiers de développement (à supprimer)
-*.bat
-*.ps1
+# Code source propriétaire (à EXCLURE du repo public pour modèle commercial)
+# Décommenter ces lignes si vous voulez garder le code source 100% privé :
+# core/
+# ui/
+# run_app.py
+# run_multi_device.py
+# run_pro.py
+
+# Fichiers de développement (optionnel - peut être gardé pour docs)
+# *.bat
+# *.ps1
+# Note: Les garder pour documentation mais ne pas commit les sensibles
 *_GUIDE.md
 *_INSTRUCTIONS*.md
 *_SETUP*.md

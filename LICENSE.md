@@ -1,22 +1,52 @@
-MIT License
+# Proprietary License - AppsMobs
 
-Copyright (c) 2025 BootyBot
+Copyright (c) 2025 AppsMobs. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## TERMS AND CONDITIONS
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software and associated documentation files (the "Software") are the proprietary and confidential information of AppsMobs.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### 1. RESTRICTIONS
 
+You may NOT:
+- Redistribute the Software
+- Reverse engineer, decompile, or disassemble the Software
+- Remove or alter any copyright notices
+- Use the Software for any commercial purpose without a valid license
+- Share, sell, or transfer your license to another party
+
+### 2. LICENSE TYPES
+
+AppsMobs offers different license types:
+- **Normal License**: Single device, personal/commercial use
+- **Pro License**: Multiple devices, commercial use
+- **Team License**: Unlimited devices, commercial use with team features
+
+Each license is tied to your account and email address.
+
+### 3. DISTRIBUTION
+
+The compiled Windows executable (.exe) is the only authorized distribution method. The source code in this repository is provided for documentation and reference purposes only.
+
+### 4. SUPPORT
+
+Licensed users receive:
+- Email support (support@appsmobs.com)
+- Access to documentation
+- Software updates during license validity
+
+### 5. WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+
+### 6. TERMINATION
+
+Violation of these terms will result in immediate license termination without refund.
+
+---
+
+**For questions about licensing, contact: support@appsmobs.com**
+
+**Website**: https://appsmobs.com
+
+**Last Updated**: 2025
