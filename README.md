@@ -135,37 +135,48 @@ appsmobs/
 ├── LICENSE.md         # Proprietary license terms
 ├── CONTRIBUTING.md    # Guidelines for issues/feedback
 │
-├── website/           # 🌐 Freemium website (public)
-│   ├── src/          # React frontend
-│   └── auth-backend/ # License management API
-│
 ├── scripts/          # 📝 Example automation scripts
 ├── installer/        # 📦 Build scripts for Windows installer
 ├── assets/           # 🎨 Icons and resources
 │
-└── [Other files]     # Build tools and examples
+└── [Other files]     # Documentation and examples
 ```
 
-> ⚠️ **Note**: The core application source code (`core/`, `ui/`) is **proprietary and excluded** from this public repository. Only the compiled Windows executable (.exe) is distributed to customers.
+> ⚠️ **Note**: The core application source code (`core/`, `ui/`) and website platform (`website/`) are **proprietary and excluded** from this public repository. Only the compiled Windows executable (.exe) is distributed to customers.
+
+### 🌐 About the Website Platform
+
+AppsMobs includes a proprietary web platform available at [appsmobs.com](https://appsmobs.com) that provides:
+- 🔐 **User Authentication** - Secure account management
+- 💳 **License Management** - Purchase and manage your AppsMobs licenses
+- 📊 **Dashboard** - Track your usage and tokens
+- 🎁 **Referral System** - Earn rewards by referring friends
+- 💬 **Support Chat** - AI-powered customer support
+- 📝 **Documentation** - Complete guides and API reference
+
+**Note**: The website source code is proprietary and not available in this repository. This repository focuses on the desktop application documentation and examples.
 
 ## 💡 About This Repository
 
 This GitHub repository serves as:
 - 📚 **Documentation Hub** - Complete user guides, API references, and tutorials
-- 🌐 **Website Source** - Marketing platform and license management system
-- 📦 **Build Tools** - Scripts and tools for creating the Windows installer
 - 🔧 **Examples** - Sample scripts and configuration files
 - 🎯 **Marketing** - Professional showcase of AppsMobs capabilities
 
 ### ⚠️ Important Notice
 
-**This repository is for DOCUMENTATION and PROMOTION purposes.**
+**This repository is for DOCUMENTATION and PROMOTION purposes only.**
 
 - ✅ **Compiled Windows application (.exe)** - Download from [appsmobs.com/download](https://appsmobs.com/download)
-- ❌ **Core application source code** - Proprietary, not available here
-- ✅ **Website source** - Public (marketing and license management)
 - ✅ **Example scripts** - Public examples for users
+- ✅ **Documentation** - Public guides and API reference
+- ❌ **Core application source code** - Proprietary, not available here
+- ❌ **Website source code** - Proprietary platform, not available here
 - ❌ **Build tools** - Proprietary compilation process
+
+**What's Public**: Documentation, examples, and marketing materials.
+**What's Private**: All source code (application + website).
+**Distribution**: Only the compiled `.exe` executable is distributed to customers.
 
 **For Users**: No Python knowledge or development setup required - just download the .exe and install!
 

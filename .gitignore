@@ -93,6 +93,10 @@ run_pro.py
 core/**/*
 ui/**/*
 
+# Website source code (propriétaire - plateforme de licences)
+website/
+website/**/*
+
 # Fichiers de développement (optionnel - peut être gardé pour docs)
 # *.bat
 # *.ps1
