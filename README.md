@@ -198,17 +198,46 @@ AppsMobs provides 35+ built-in functions that are automatically available in you
 - `swipe_right()` or `rightswipe()` - Swipe right
 
 ### 👁️ Image Recognition (OpenCV)
-- `find(image, confidence=0.8, region=None)` - Find image once, returns (x,y) or None
-- `find_image_bool(image, confidence, region)` - Boolean check (True/False)
-- `find_images_list([images], confidence, region)` - Find first match from list
-- `find_all(image, confidence, region)` - Find all occurrences
-- `find_image_and_click(image, confidence)` - Find and click if visible
-- `find_loop(image, confidence, region)` - Loop until image appears
-- `find_and_click_loop(image, confidence, ...)` - Loop and click when visible
-- `find_and_click_loop_with_sound(image, ...)` - Same with periodic alert
-- `wait_for_image(image, confidence, timeout, region)` - Wait until appears (or timeout)
-- `click_until_image_appears(positions, target, ...)` - Click positions until target appears
-- `long_press_image(image, duration_ms, confidence)` - Long press if image visible
+
+**Single Image Search (Recommended):**
+- `find(image, confidence=0.8, region=None)` - **Find once**, returns `(x, y)` or `None` ⭐ **RECOMMENDED**
+- `find_image(image, confidence, region)` - Alias for `find()`
+- `image_exists(image, confidence, region)` - **Boolean check**, returns `True/False`
+- `find_image_bool(image, confidence, region)` - Alias for `image_exists()`
+
+**Continuous Search (Infinite Loop):**
+- `find_loop(image, confidence, region)` - **Loop until found**, returns `(x, y)` when found
+
+**Multiple Images:**
+- `find_first_image(images, confidence, region)` - Loop until one image from list is found
+- `find_images_list(images, confidence, region)` - Alias for `find_first_image()`
+- `any_image_exists(images, confidence, region)` - Check if any image in list exists
+- `find_all_images(images, confidence, region)` - Find all images, returns `dict`
+- `find_all(image, confidence, region)` - Alias for `find_all_images()`
+
+**Find and Click (Infinite Loop - Most Used):**
+- `find_and_click(image, confidence, region, xp, yp)` - **Loop until found, then click** ⭐ **MOST POPULAR**
+- `find_image_and_click(image, confidence, ...)` - Alias for `find_and_click()`
+- `click_when_visible(image, confidence, ...)` - Very descriptive alias
+- `find_and_click_with_sound(image, confidence, max_attempts, ...)` - Same with sound alert
+
+**Find and Click (List):**
+- `click_first_found(images, confidence, region, xp, yp)` - Click first image found from list
+- `find_and_click_list(images, confidence, ...)` - Alias
+- `click_when_any_visible(images, confidence, ...)` - Infinite loop, click when any image appears
+- `find_and_click_loop(images, confidence, ...)` - Alias
+
+**Double Click:**
+- `find_and_double_click(image, confidence, region)` - Loop until found, then double click
+- `double_click_when_visible(image, confidence, ...)` - Very descriptive alias
+- `find_and_double_click_list(images, confidence, region)` - Loop through list, double click first found
+
+**Advanced Utilities:**
+- `wait_until_visible(image, confidence, timeout, region)` - Wait until appears (with timeout)
+- `wait_for_image(image, confidence, timeout, region)` - Alias for `wait_until_visible()`
+- `click_until_image_appears(positions, target, max_clicks, confidence)` - Click positions until target appears
+- `long_press_when_visible(image, duration_ms, confidence)` - Long press if image visible
+- `long_press_image(image, duration_ms, confidence)` - Alias for `long_press_when_visible()`
 
 ### 🔧 System & Network
 - `screenshot(filename)` - Save a screenshot
@@ -232,9 +261,19 @@ def my_script(android_client, serial):
         click(540, 960)
         wait(1.0)
         
-        # Find and click an image
-        if find_image_and_click("button.png", 0.85):
+        # Find image once (recommended for single check)
+        pos = find("button.png", 0.85)
+        if pos:
+            x, y = pos
+            click(x, y)
             log(serial, "Button found and clicked")
+        
+        # Find and click with infinite loop (most popular)
+        find_and_click("next_button.png", 0.85)  # Loops until found, then clicks
+        
+        # Check if image exists (boolean)
+        if image_exists("success.png", 0.9):
+            log(serial, "Success image is visible!")
         
         # Swipe down
         swipe_down()
@@ -242,9 +281,12 @@ def my_script(android_client, serial):
         # Type text
         write("Hello AppsMobs!")
         
-        # Wait for image to appear
-        if wait_for_image("success.png", 0.9, timeout=10):
-            log(serial, "Success!")
+        # Wait for image with timeout
+        if wait_until_visible("done.png", 0.9, timeout=10):
+            log(serial, "Done!")
+        
+        # Click first image found from a list
+        click_first_found(["option1.png", "option2.png"], 0.85)
         
         result['success'] = True
     except Exception as e:
@@ -253,6 +295,17 @@ def my_script(android_client, serial):
     
     return result
 ```
+
+### Quick Reference - Most Used Functions
+
+| Function | Description |
+|---------|-----------|
+| `find(image, conf)` | Find once, returns (x,y) or None |
+| `find_and_click(image, conf)` | Loop until found, then click ⭐ |
+| `image_exists(image, conf)` | Check if image exists (True/False) |
+| `wait_until_visible(image, conf, timeout)` | Wait with timeout |
+| `click_when_visible(image, conf)` | Same as find_and_click |
+| `click_first_found(images, conf)` | Click first from list |
 
 [View full API documentation →](https://appsmobs.com/docs/playground)
 
