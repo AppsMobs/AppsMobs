@@ -55,11 +55,13 @@ package-lock.json
 *.bak
 *.cache
 
-# Documentation interne (garder seulement README.md, LICENSE.md, CONTRIBUTING.md)
+# Documentation interne (garder seulement les fichiers essentiels)
 *.md
 !README.md
 !LICENSE.md
 !CONTRIBUTING.md
+!SECURITY.md
+!CHANGELOG.md
 
 # Screenshots et fichiers temporaires
 screenshots/

@@ -80,11 +80,11 @@ def my_script(android_client, serial):
         click(540, 960)
         
         
-        # Doble clic
+        # Double click
         doubleclick(540, 960)
         
 
-        # Wait time -1sec
+        # Wait 1 second
         wait(1.0)
 
         # Find image
