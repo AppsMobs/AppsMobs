@@ -9,6 +9,34 @@
 
 **🎯 Get Started**: Download the Windows installer (.exe) from [appsmobs.com/download](https://appsmobs.com/download)
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Dashboard - Multi-Device Management
+![Dashboard](assets/dashboard.png)
+
+### Device Control & Screen Mirroring
+![Device Control](assets/control.png)
+
+### Script Playground - Built-in Code Editor
+![Script Playground](assets/playground.png)
+
+### Scripts Management
+![Scripts](assets/scripts.png)
+
+### Console & Logs
+![Console](assets/console.png)
+
+### Profile & Settings
+![Profile](assets/profile.png)
+![Settings](assets/settings.png)
+
+### License Management
+![License](assets/token.png)
+
+</div>
+
 > ⚠️ **Commercial Software**: AppsMobs is proprietary software distributed as a compiled Windows executable. This repository contains documentation, website source, and build tools - not the full application source code.
 
 ## ✨ Features
