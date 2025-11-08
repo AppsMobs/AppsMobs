@@ -170,25 +170,88 @@ AppsMobs offers flexible pricing plans:
 
 ## 🛠️ Script Functions
 
-AppsMobs provides helper functions in your scripts:
+AppsMobs provides 35+ built-in functions that are automatically available in your scripts. No imports needed!
 
-### Helper Functions (Provided by Runtime)
-- `log(serial, message, level="INFO")` - Log messages
-- `wait(seconds)` - Wait/delay
-- `upswipe(android_client)` - Swipe up
-- `downswipe(android_client)` - Swipe down
+### 📝 Logging & Utilities
+- `log(serial, message, level="INFO")` - Log messages to console
+- `log_step(serial, step_name)` - Log script steps
+- `wait(seconds)` or `sleep(seconds)` - Wait/delay execution
+- `random_delay(min_s, max_s)` - Random delay (anti-bot)
 
-### Android Client Methods
-- `android_client.tap(x, y)` - Tap at coordinates
-- `android_client.text(text)` - Type text
-- `android_client.swipe(x1, y1, x2, y2)` - Custom swipe
-- `android_client.back()` - Back button
-- `android_client.home()` - Home button
-- `android_client.recents()` - Recents button
+### 🖱️ Click & Touch Controls
+- `click(x, y)` - Click at coordinates
+- `doubleclick(x, y)` - Double-click at coordinates
+- `long_press(x, y, duration_ms)` - Long press at coordinates
+- `swipe(x1, y1, x2, y2, duration)` - Custom swipe from point A to B
 
-### Alternative: Import from core (if needed)
+### ⌨️ Navigation & Input
+- `write(text)` - Type text into focused field
+- `back()` - Press back button
+- `home()` - Press home button
+- `enter()` - Press enter/confirm key
+- `switch_app()` - Open app switcher (multitasking)
+
+### 👆 Directional Swipes
+- `swipe_up()` or `upswipe()` - Swipe up
+- `swipe_down()` or `downswipe()` - Swipe down
+- `swipe_left()` or `leftswipe()` - Swipe left
+- `swipe_right()` or `rightswipe()` - Swipe right
+
+### 👁️ Image Recognition (OpenCV)
+- `find(image, confidence=0.8, region=None)` - Find image once, returns (x,y) or None
+- `find_image_bool(image, confidence, region)` - Boolean check (True/False)
+- `find_images_list([images], confidence, region)` - Find first match from list
+- `find_all(image, confidence, region)` - Find all occurrences
+- `find_image_and_click(image, confidence)` - Find and click if visible
+- `find_loop(image, confidence, region)` - Loop until image appears
+- `find_and_click_loop(image, confidence, ...)` - Loop and click when visible
+- `find_and_click_loop_with_sound(image, ...)` - Same with periodic alert
+- `wait_for_image(image, confidence, timeout, region)` - Wait until appears (or timeout)
+- `click_until_image_appears(positions, target, ...)` - Click positions until target appears
+- `long_press_image(image, duration_ms, confidence)` - Long press if image visible
+
+### 🔧 System & Network
+- `screenshot(filename)` - Save a screenshot
+- `toggle_airplane_mode()` - Toggle airplane mode ON then OFF
+- `clear_cache()` - Clear app cache
+- `restart_app()` - Restart current app
+
+### 📊 Advanced Utilities
+- `move_with_variation(...)` - Move with random variation
+
+### Example Usage
+
 ```python
-from core.android_functions import tap, text, swipe
+def my_script(android_client, serial):
+    result = {'success': False, 'message': '', 'data': {}}
+    
+    try:
+        log(serial, "Starting automation")
+        
+        # Click at coordinates
+        click(540, 960)
+        wait(1.0)
+        
+        # Find and click an image
+        if find_image_and_click("button.png", 0.85):
+            log(serial, "Button found and clicked")
+        
+        # Swipe down
+        swipe_down()
+        
+        # Type text
+        write("Hello AppsMobs!")
+        
+        # Wait for image to appear
+        if wait_for_image("success.png", 0.9, timeout=10):
+            log(serial, "Success!")
+        
+        result['success'] = True
+    except Exception as e:
+        log(serial, f"Error: {e}", "ERROR")
+        result['message'] = str(e)
+    
+    return result
 ```
 
 [View full API documentation →](https://appsmobs.com/docs/playground)
