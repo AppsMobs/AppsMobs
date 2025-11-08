@@ -1,22 +1,22 @@
 """
-Script personnalisé pour BootyBot
-Modifiez la fonction my_script() pour créer votre automatisation
+Custom script example for AppsMobs
+Edit the my_script() function to build your own automation.
 """
 
 
 
 def my_script(android_client, serial):
     """
-    Votre script personnalisé
-    
+    Your custom script entrypoint.
+
     Args:
-        android_client: Instance Android (pour cliquer, swiper, etc.)
-        serial: Numéro de série du device
-        
+        android_client: Android client instance (tap, swipe, etc.)
+        serial: Device serial number
+
     Returns:
         dict: {'success': bool, 'message': str, 'data': {}}
     """
-    # Importer les fonctions de logging
+    # Use helper functions provided by the runtime: log, wait, upswipe, downswipe
     result = {
         'success': False,
         'message': '',
@@ -24,7 +24,7 @@ def my_script(android_client, serial):
     }
     
     try:
-        log(serial, "Début du script")
+        log(serial, "Script started")
 
 
         upswipe(android_client)
@@ -33,12 +33,12 @@ def my_script(android_client, serial):
         wait(1.0)
 
         
-        log(serial, "Script terminé avec succès!")
+        log(serial, "Script finished successfully!")
         result['success'] = True
-        result['message'] = f'Script exécuté sur {serial}'
+        result['message'] = f'Script executed on {serial}'
         result['data']['device'] = serial
     except Exception as e:
-        log(serial, f"Erreur: {e}", "ERROR")
+        log(serial, f"Error: {e}", "ERROR")
         result['success'] = False
         result['message'] = str(e)
         import traceback

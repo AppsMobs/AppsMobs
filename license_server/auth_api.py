@@ -109,12 +109,21 @@ async def upsert_profile_db(data: Dict[str, Any]) -> bool:
         return False
 
 async def get_profile_db(email: str) -> Optional[Dict[str, Any]]:
+    """Récupère le profil utilisateur depuis Supabase (sécurisé - seulement les champs nécessaires)"""
     if not supabase:
         return None
     try:
-        response = supabase.table('profiles').select('*').eq('email', email).execute()
+        # Sélectionner seulement les champs nécessaires (pas de données sensibles)
+        # Inclure referral_code et tokens (ou credits/jetons selon le nom de la colonne)
+        response = supabase.table('profiles').select('email,first_name,last_name,country,avatar_url,referral_code,tokens,credits,jetons,created_at,updated_at').eq('email', email).execute()
         if response.data:
-            return response.data[0]
+            profile = response.data[0]
+            # Normaliser le nom de la colonne pour les jetons (peut être tokens, credits, ou jetons)
+            if 'tokens' not in profile and 'credits' in profile:
+                profile['tokens'] = profile.get('credits', 0)
+            elif 'tokens' not in profile and 'jetons' in profile:
+                profile['tokens'] = profile.get('jetons', 0)
+            return profile
     except Exception as e:
         print(f"Erreur Supabase get profile: {e}")
     return None
@@ -301,9 +310,101 @@ async def verify_license(request: LicenseRequest):
             message=f"Erreur serveur: {str(e)}"
         )
 
+# ----------- License Info API (sécurisé) -----------
+@app.get("/api/license/info")
+async def get_license_info(email: str = None):
+    """Récupère les informations de licence depuis Supabase (sécurisé - seulement plan et expires_at)"""
+    try:
+        if not email:
+            raise HTTPException(status_code=400, detail="Email requis")
+        
+        # Récupérer la licence depuis Supabase (sans clé - seulement par email)
+        if not supabase:
+            raise HTTPException(status_code=500, detail="Supabase non configuré")
+        
+        try:
+            # Récupérer la licence active pour cet email (la plus récente)
+            # Essayer d'abord avec order, sinon récupérer toutes et trier
+            try:
+                response = supabase.table('licenses').select('plan,expires_at,email,created_at').eq('email', email).order('created_at', desc=True).limit(1).execute()
+            except:
+                # Si order ne fonctionne pas, récupérer toutes les licences et trier manuellement
+                response = supabase.table('licenses').select('plan,expires_at,email,created_at').eq('email', email).execute()
+                if response.data and len(response.data) > 0:
+                    # Trier par created_at décroissant
+                    response.data.sort(key=lambda x: x.get('created_at', 0) or 0, reverse=True)
+                    # Prendre la première (la plus récente)
+                    response.data = [response.data[0]]
+            
+            print(f"[API] License info query for {email}: {len(response.data) if response.data else 0} results")
+            
+            if response.data and len(response.data) > 0:
+                license_data = response.data[0]
+                plan = license_data.get('plan')
+                expires_at = license_data.get('expires_at')
+                print(f"[API] License data found: plan={plan}, expires_at={expires_at}, type(expires_at)={type(expires_at)}")
+                
+                # Convertir expires_at en timestamp Unix si c'est une date string
+                if expires_at and isinstance(expires_at, str):
+                    try:
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                        expires_at = int(dt.timestamp())
+                        print(f"[API] Converted expires_at from string to timestamp: {expires_at}")
+                    except Exception as e:
+                        print(f"[API] Erreur conversion date: {e}")
+                
+                return {
+                    'success': True,
+                    'plan': plan,
+                    'expires_at': expires_at,
+                    'email': license_data.get('email')
+                }
+            print(f"[API] No license found for {email}")
+            return { 'success': False, 'message': 'Licence introuvable' }
+        except Exception as e:
+            print(f"Erreur Supabase get license info: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Erreur générale get license info: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+
 # ----------- Profiles API -----------
+@app.get("/api/profile/get")
+async def get_profile(email: str = None):
+    """Récupère le profil utilisateur depuis Supabase (sécurisé - pas de données sensibles)"""
+    try:
+        if not email:
+            raise HTTPException(status_code=400, detail="Email requis")
+        profile = await get_profile_db(email)
+        if not profile:
+            return { 'success': True, 'profile': None }
+        # Filtrer les données sensibles (ne pas retourner de tokens JWT, clés, etc.)
+        # Mais inclure referral_code et tokens (jetons) qui sont des données utilisateur
+        safe_profile = {
+            'email': profile.get('email'),
+            'first_name': profile.get('first_name'),
+            'last_name': profile.get('last_name'),
+            'country': profile.get('country'),
+            'avatar_url': profile.get('avatar_url'),
+            'referral_code': profile.get('referral_code'),
+            'tokens': profile.get('tokens') or profile.get('credits') or profile.get('jetons') or 0,
+            'created_at': profile.get('created_at'),
+            'updated_at': profile.get('updated_at')
+        }
+        return { 'success': True, 'profile': safe_profile }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+
 @app.post("/api/profile/upsert")
 async def upsert_profile(request: ProfileUpsertRequest):
+    """Met à jour ou crée le profil utilisateur (sécurisé - pas de données sensibles)"""
     try:
         data = {
             'email': request.email,
@@ -316,8 +417,24 @@ async def upsert_profile(request: ProfileUpsertRequest):
         ok = await upsert_profile_db(data)
         if not ok:
             raise HTTPException(status_code=500, detail='Erreur upsert profil')
+        # Récupérer le profil mis à jour (déjà filtré par get_profile_db)
         profile = await get_profile_db(request.email)
-        return { 'success': True, 'profile': profile }
+        if not profile:
+            return { 'success': True, 'profile': None }
+        # Filtrer les données sensibles (double sécurité)
+        # Mais inclure referral_code et tokens (jetons) qui sont des données utilisateur
+        safe_profile = {
+            'email': profile.get('email'),
+            'first_name': profile.get('first_name'),
+            'last_name': profile.get('last_name'),
+            'country': profile.get('country'),
+            'avatar_url': profile.get('avatar_url'),
+            'referral_code': profile.get('referral_code'),
+            'tokens': profile.get('tokens') or profile.get('credits') or profile.get('jetons') or 0,
+            'created_at': profile.get('created_at'),
+            'updated_at': profile.get('updated_at')
+        }
+        return { 'success': True, 'profile': safe_profile }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
 

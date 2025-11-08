@@ -7,6 +7,30 @@ let scripts = [];
 let selectedDevices = new Set();
 let selectedScripts = new Set();
 const runningScripts = new Map(); // serial -> { name, start }
+let notifications = []; // {id,type,title,message,ts}
+let notificationsEnabled = true;
+let soundAlertsEnabled = true;
+let autoRefreshEnabled = true;
+let autoRefreshInterval = null;
+const recentExitSerials = new Set(); // to avoid duplicate stopped after exit
+const lastNotifAt = new Map(); // key -> timestamp for rate limit
+const pausedSerials = new Set(); // serials with scripts marked as paused (UI-level)
+const favoriteScripts = new Set(); // favorite script names
+const recentScripts = []; // {name, timestamp} - last 10
+let currentScriptFilter = 'all'; // 'all', 'favorites', 'recent'
+
+// Keyboard shortcuts management
+const defaultShortcuts = {
+  'run_selected': { key: 'F5', action: () => runScriptSelected() },
+  'pause_selected': { key: 'F6', action: () => pauseSelected() },
+  'resume_selected': { key: 'F7', action: () => resumeSelected() },
+  'stop_all': { key: 'F8', action: () => stopAll() },
+  'screenshot': { key: 'F9', action: () => captureScreenshotSelected() },
+  'scrcpy': { key: 'F10', action: () => openScrcpySelected() },
+  'refresh_devices': { key: 'F11', action: () => refreshDevices() }
+};
+
+let customShortcuts = {};
 
 // DOM elements
 const devicesGrid = document.getElementById('devices-grid');
@@ -16,6 +40,10 @@ const consoleOutput = document.getElementById('console-output');
 const statusElement = document.getElementById('status');
 const devicesSearchInput = document.getElementById('devices-search');
 const scriptsSearchInput = document.getElementById('scripts-search');
+// Notification DOM
+const notificationsBtn = document.getElementById('notifications-btn');
+const notificationsBadge = document.getElementById('notifications-badge');
+const notificationsPanel = document.getElementById('notifications-panel');
 
 // Stats elements
 const devicesCount = document.getElementById('devices-count');
@@ -29,6 +57,58 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   checkLicenseStatus();
   updateLicenseWarning();
+  setupNotificationsUI();
+  loadFavoriteScripts();
+  loadRecentScripts();
+  updateFilterButtons();
+  // Load current version
+  if (window.electronAPI && window.electronAPI.getAppVersion) {
+    window.electronAPI.getAppVersion().then(version => {
+      const el = document.getElementById('current-version');
+      if (el) el.textContent = `v${version}`;
+      const side = document.getElementById('sidebar-version');
+      if (side) side.textContent = `v${version}`;
+    }).catch(() => {});
+  }
+  // Load header logo from packaged assets
+  try {
+    const img = document.getElementById('appHeaderLogo');
+    if (img && window.electronAPI && window.electronAPI.getAssetPath) {
+      window.electronAPI.getAssetPath('icons/Logo.png').then(url => {
+        if (url && url !== 'null') {
+          img.src = url;
+          img.style.display = 'block';
+          img.onerror = () => {
+            window.electronAPI.getAssetPath('icons/Logo.ico').then(icoUrl => {
+              if (icoUrl && icoUrl !== 'null') {
+                img.src = icoUrl;
+              }
+            }).catch(() => {
+              img.src = '../assets/icons/Logo.png';
+            });
+          };
+        } else {
+          img.src = '../assets/icons/Logo.png';
+        }
+      }).catch(() => {
+        img.src = '../assets/icons/Logo.png';
+      });
+    } else if (img) {
+      img.src = '../assets/icons/Logo.png';
+    }
+  } catch {}
+  // Inline toast container
+  try {
+    const existing = document.getElementById('inline-toast-container');
+    if (!existing) {
+      const c = document.createElement('div');
+      c.id = 'inline-toast-container';
+      c.className = 'inline-toast-container';
+      document.body.appendChild(c);
+      // Position once created so it's aligned from the start
+      try { positionInlineToastContainer(); } catch {}
+    }
+  } catch {}
 
   // Charger section Profil si le bouton existe
   try {
@@ -52,6 +132,156 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1000);
 });
 
+function setupNotificationsUI(){
+  if (!notificationsBtn) return;
+  // Ensure the notifications panel is portaled to <body> so it isn't affected
+  // by parent stacking contexts or overflow rules. Keep original node but move it once.
+  try {
+    if (notificationsPanel && notificationsPanel.parentElement !== document.body) {
+      document.body.appendChild(notificationsPanel);
+      // Make sure it stays on top of everything
+      notificationsPanel.style.position = 'fixed';
+      notificationsPanel.style.zIndex = '2147483647';
+    }
+  } catch {}
+  notificationsBtn.addEventListener('click', () => {
+    if (notificationsPanel) notificationsPanel.classList.toggle('hidden');
+    if (notificationsPanel && !notificationsPanel.classList.contains('hidden')) {
+      positionNotificationsPanel();
+      renderNotifications();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    try {
+      if (!notificationsPanel) return;
+      if (!notificationsPanel.contains(e.target) && e.target !== notificationsBtn) {
+        notificationsPanel.classList.add('hidden');
+      }
+    } catch {}
+  });
+  window.addEventListener('resize', () => { if (notificationsPanel && !notificationsPanel.classList.contains('hidden')) positionNotificationsPanel(); });
+  window.addEventListener('scroll', () => { if (notificationsPanel && !notificationsPanel.classList.contains('hidden')) positionNotificationsPanel(); }, true);
+  // Keep inline toast container anchored under the bell as well
+  window.addEventListener('resize', positionInlineToastContainer);
+  window.addEventListener('scroll', positionInlineToastContainer, true);
+}
+
+function shouldNotify(key, windowMs = 3000){
+  try {
+    const now = Date.now();
+    const last = lastNotifAt.get(key) || 0;
+    if (now - last < windowMs) return false;
+    lastNotifAt.set(key, now);
+    return true;
+  } catch { return true; }
+}
+
+function playSound(type = 'info') {
+  if (!soundAlertsEnabled) return;
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Different frequencies for different types
+    const frequencies = {
+      success: 523.25, // C5
+      error: 220.00,   // A3
+      warning: 349.23, // F4
+      info: 440.00     // A4
+    };
+    
+    oscillator.frequency.value = frequencies[type] || frequencies.info;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (e) {
+    // Fallback: use beep if AudioContext not available
+    console.log('Sound alert:', type);
+  }
+}
+
+function pushNotification(type, title, message){
+  if (!notificationsEnabled) return;
+  const key = `${type}|${title}|${message}`;
+  if (!shouldNotify(key)) return;
+  const item = { id: Date.now() + Math.random(), type, title, message, ts: new Date() };
+  notifications.unshift(item);
+  if (notificationsBadge) {
+    notificationsBadge.textContent = String(Math.min(99, notifications.length));
+    notificationsBadge.classList.toggle('hidden', notifications.length === 0);
+  }
+  renderNotifications();
+  playSound(type);
+}
+
+function renderNotifications(){
+  if (!notificationsPanel) return;
+  notificationsPanel.innerHTML = notifications.map(n => `
+    <div class="notification-item" role="listitem">
+      <div><span class="material-symbols-outlined">${n.type === 'error' ? 'error' : n.type === 'warning' ? 'warning' : n.type === 'success' ? 'check_circle' : 'notifications'}</span></div>
+      <div>
+        <div class="notification-title">${n.title}</div>
+        <div class="notification-meta">${n.message} · ${n.ts.toLocaleTimeString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function positionNotificationsPanel(){
+  try {
+    const btn = notificationsBtn;
+    const panel = notificationsPanel;
+    if (!btn || !panel) return;
+    const r = btn.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 320;
+    const left = Math.max(8, Math.min(window.innerWidth - panelWidth - 8, r.left + (r.width - panelWidth)));
+    panel.style.top = `${r.bottom + 8}px`;
+    panel.style.left = `${left}px`;
+  } catch {}
+}
+
+function positionInlineToastContainer(){
+  try {
+    const c = document.getElementById('inline-toast-container');
+    if (!c || !notificationsBtn) return;
+    const r = notificationsBtn.getBoundingClientRect();
+    const maxWidth = Math.min(540, Math.max(280, Math.floor(window.innerWidth * 0.4)));
+    c.style.position = 'fixed';
+    c.style.width = `${maxWidth}px`;
+    c.style.top = `${r.bottom + 8}px`;
+    // Right-align the toast stack with the bell icon
+    const cWidth = c.offsetWidth || maxWidth;
+    const left = Math.max(8, Math.min(window.innerWidth - cWidth - 8, r.left + r.width - cWidth));
+    c.style.left = `${left}px`;
+    c.style.transform = 'none';
+    c.style.zIndex = '2147483647';
+  } catch {}
+}
+
+function showInlineToast(type, title, message){
+  try {
+    if (!notificationsEnabled) return;
+    const c = document.getElementById('inline-toast-container');
+    if (!c) return;
+    // Ensure it's anchored under the bell icon
+    positionInlineToastContainer();
+    const el = document.createElement('div');
+    el.className = `inline-toast ${type}`;
+    el.style.width = '100%';
+    el.innerHTML = `<strong>${title}</strong><div style="font-size:12px;color:#8aa7bd;">${message}</div>`;
+    c.appendChild(el);
+    setTimeout(() => { try { c.removeChild(el); } catch {} }, 3000);
+  } catch {}
+}
+
 // Add language initialization at top. Keep original code below.
 let lang = 'en';
 let translations = {};
@@ -65,17 +295,16 @@ async function loadLang(l) {
     translations = { welcome: l };
   }
   if (typeof updateLocalizedUI === 'function') updateLocalizedUI();
-  // maj UI settings select
-  const langSelect = document.getElementById('select-language');
-  if(langSelect && langSelect.value !== l){
-    langSelect.value = l;
-  }
+  // Update language dropdown
+  updateLanguageDropdown();
 }
 function t(key, options = {}) {
   let translated = translations[key] || key;
   if (options && typeof translated === 'string') {
     for (const [k, v] of Object.entries(options)) {
-      translated = translated.replace(`{{${k}}}`, v);
+      // Support both {{key}} and {key}
+      translated = translated.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+      translated = translated.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
     }
   }
   return translated;
@@ -207,8 +436,10 @@ function setupEventListeners() {
     btn.addEventListener('click', () => switchSection(btn.dataset.section));
   });
 
-  // Device actions
-  on('refresh-btn', 'click', refreshDevices);
+  // Device actions - Refresh buttons (multiple instances)
+  document.querySelectorAll('#refresh-btn, #control-refresh-btn, #header-refresh-btn').forEach(btn => {
+    btn.addEventListener('click', refreshDevices);
+  });
   on('setup-btn', 'click', setupSelectedDevices); // might not exist in Dashboard
   on('scrcpy-btn', 'click', openScrcpySelected);
   on('screenshot-btn', 'click', captureScreenshotSelected);
@@ -293,7 +524,12 @@ function setupEventListeners() {
   on('run-selected-btn', 'click', runScriptSelected);
   on('run-all-btn', 'click', runOnAll);
   on('stop-all-btn', 'click', stopAll);
-  on('report-btn', 'click', showReport);
+  on('stop-selected-btn', 'click', stopSelected);
+  // Pause/Resume controls (quick actions)
+  on('pause-all-btn', 'click', pauseAll);
+  on('pause-selected-btn', 'click', pauseSelected);
+  on('resume-all-btn', 'click', resumeAll);
+  on('resume-selected-btn', 'click', resumeSelected);
 
   // Console actions
   on('clear-console-btn', 'click', clearConsole);
@@ -331,6 +567,10 @@ function setupEventListeners() {
   on('cancel-scrcpy', 'click', closeScrcpyModal);
   on('confirm-scrcpy', 'click', confirmScrcpySelection);
 
+  // Keyboard shortcuts modal
+  on('open-shortcuts-modal-btn', 'click', openShortcutsModal);
+  on('close-shortcuts-modal', 'click', closeShortcutsModal);
+
   // Settings toggles and sliders
   setupSettingsListeners();
 
@@ -342,6 +582,26 @@ function setupEventListeners() {
   if (scriptsSearchInput) scriptsSearchInput.addEventListener('input', filterScripts);
   const scriptsSearchBtn = document.getElementById('scripts-search-btn');
   if (scriptsSearchBtn) scriptsSearchBtn.addEventListener('click', filterScripts);
+  
+  // Script filters
+  on('filter-favorites', 'click', () => { currentScriptFilter = 'favorites'; renderScripts(); updateFilterButtons(); });
+  on('filter-recent', 'click', () => { currentScriptFilter = 'recent'; renderScripts(); updateFilterButtons(); });
+  on('filter-all', 'click', () => { currentScriptFilter = 'all'; renderScripts(); updateFilterButtons(); });
+  on('filter-favorites-section', 'click', () => { currentScriptFilter = 'favorites'; renderScripts(); updateFilterButtons(); });
+  on('filter-recent-section', 'click', () => { currentScriptFilter = 'recent'; renderScripts(); updateFilterButtons(); });
+  on('filter-all-section', 'click', () => { currentScriptFilter = 'all'; renderScripts(); updateFilterButtons(); });
+  
+  // Actions section buttons (duplicate from dashboard)
+  on('run-selected-btn-section', 'click', runScriptSelected);
+  on('run-all-btn-section', 'click', runOnAll);
+  on('stop-all-btn-section', 'click', stopAll);
+  on('stop-selected-btn-section', 'click', stopSelected);
+  on('pause-selected-btn-section', 'click', pauseSelected);
+  on('pause-all-btn-section', 'click', pauseAll);
+  on('resume-selected-btn-section', 'click', resumeSelected);
+  on('resume-all-btn-section', 'click', resumeAll);
+  on('screenshot-btn-section', 'click', captureScreenshotSelected);
+  on('scrcpy-btn-section', 'click', openScrcpySelected);
 
   // Device selection (dashboard grid)
   devicesGrid.addEventListener('click', (e) => {
@@ -417,12 +677,63 @@ function setupEventListeners() {
     appendConsoleLine(serial, line.trimEnd(), level || 'INFO');
     // Historique global existant
     log(line.trimEnd(), level || 'INFO');
+    // Fallback: si le log indique fin de script, force l'état terminé
+    try {
+      const l = (line || '').toString().toLowerCase();
+      if (l.includes('script termin') || l.includes('script terminé') || l.includes('script termine')) {
+        if (runningScripts.has(serial)) {
+          runningScripts.delete(serial);
+          renderDevices();
+          if (runningScripts.size === 0) updateStatus('● Prêt');
+          if (shouldNotify(`inline|done|${serial}`, 3000)) {
+            pushNotification('success', 'Script terminé', `${serial}`);
+            showInlineToast('success', 'Script terminé', `${serial}`);
+          }
+        }
+      }
+    } catch {}
   });
   window.electronAPI.onScriptExit(({ serial, code }) => {
     log(`[${serial}] Script terminé (code ${code})`, code === 0 ? 'SUCCESS' : 'ERROR');
     runningScripts.delete(serial);
     renderDevices();
     updateStatus('● Prêt');
+    pushNotification(code === 0 ? 'success' : 'error', 'Script terminé', `${serial} · code ${code}`);
+    try {
+      if (notificationsEnabled) {
+        if (code === 0) {
+          window.electronAPI.showNotificationSuccess('Script terminé', `${serial}`);
+        } else {
+          window.electronAPI.showNotificationError('Script terminé avec erreur', `${serial} · code ${code}`);
+        }
+      }
+    } catch {}
+    showInlineToast(code === 0 ? 'success' : 'error', 'Script terminé', `${serial}`);
+    try {
+      recentExitSerials.add(serial);
+      setTimeout(() => { recentExitSerials.delete(serial); }, 2000);
+    } catch {}
+  });
+  // Réception des statuts (running/stopped) envoyés par le main
+  window.electronAPI.onScriptStatus(({ serial, status }) => {
+    if (status === 'running') {
+      runningScripts.set(serial, { name: (currentScriptsSectionSelection?.name || 'script'), start: Date.now() });
+      pushNotification('info', 'Script démarré', `${serial}`);
+      try { if (notificationsEnabled && shouldNotify(`toast|start|${serial}`, 3000)) window.electronAPI.showNotificationInfo('Script démarré', `${serial}`); } catch {}
+      showInlineToast('info', 'Script démarré', `${serial}`);
+    } else if (status === 'stopped') {
+      runningScripts.delete(serial);
+      // Si plus aucun script ne tourne, remettre le statut prêt
+      if (runningScripts.size === 0) {
+        updateStatus('● Prêt');
+      }
+      if (!recentExitSerials.has(serial)) {
+        pushNotification('warning', 'Script arrêté', `${serial}`);
+        try { if (notificationsEnabled && shouldNotify(`toast|stop|${serial}`, 3000)) window.electronAPI.showNotificationWarning('Script arrêté', `${serial}`); } catch {}
+        showInlineToast('warning', 'Script arrêté', `${serial}`);
+      }
+    }
+    renderDevices();
   });
 }
 
@@ -491,10 +802,10 @@ function postDevicesToEditor(){
 }
 
 async function refreshDevices() {
-  const btn = document.getElementById('refresh-btn');
-  if (btn) btn.classList.add('loading');
-  const btn2 = document.getElementById('control-refresh-btn');
-  if (btn2) btn2.classList.add('loading');
+  // Ajouter la classe loading à tous les boutons refresh
+  document.querySelectorAll('#refresh-btn, #control-refresh-btn, #header-refresh-btn').forEach(btn => {
+    btn.classList.add('loading');
+  });
   
   try {
     log(t('refreshing_devices'), 'DEBUG');
@@ -508,8 +819,10 @@ async function refreshDevices() {
   } catch (error) {
     log(`${t('refresh_error')}: ${error.message}`, 'ERROR');
   } finally {
-    if (btn) btn.classList.remove('loading');
-    if (btn2) btn2.classList.remove('loading');
+    // Retirer la classe loading de tous les boutons refresh
+    document.querySelectorAll('#refresh-btn, #control-refresh-btn, #header-refresh-btn').forEach(btn => {
+      btn.classList.remove('loading');
+    });
   }
 }
 
@@ -546,7 +859,7 @@ function renderDevices() {
         <div class="device-header">
           <span class="device-icon" style="font-size: 24px; margin-right:8px;">${icon}</span>
           <div class="device-serial">${device.serial}</div>
-          <span class="device-type ${typeClass}" style="margin-left: 8px; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:9px; background:${device.type==='emulator'?'#7cdfff50':'#35ef6150'}; color:${device.type==='emulator'?'#069':'#063'}">${typeLabel}</span>
+          <span class="device-type ${typeClass}" style="margin-left: 8px; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:9px; background:${device.type==='emulator'?'#22d3ee':'#16a34a'}; color:#0b1220;">${typeLabel}</span>
         </div>
         <div class="device-status ${device.status === 'device' ? 'connected' : 'disconnected'}">
           ${device.status === 'device' ? t('connected') : t('disconnected')}
@@ -574,12 +887,27 @@ function renderDevices() {
 }
 
 function renderScripts() {
-  scriptsGrid.innerHTML = scripts.map(script => {
+  // Filter scripts based on current filter
+  let filteredScripts = scripts;
+  if (currentScriptFilter === 'favorites') {
+    filteredScripts = scripts.filter(s => favoriteScripts.has(s.name));
+  } else if (currentScriptFilter === 'recent') {
+    const recentNames = new Set(recentScripts.slice(-10).map(r => r.name));
+    filteredScripts = scripts.filter(s => recentNames.has(s.name));
+  }
+  
+  scriptsGrid.innerHTML = filteredScripts.map(script => {
     const isSelected = selectedScripts.has(script.name);
+    const isFavorite = favoriteScripts.has(script.name);
     
     return `
       <div class="script-card ${isSelected ? 'selected' : ''}" data-script="${script.name}">
-        <div class="script-name">${script.name}</div>
+        <div class="script-header-row" style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="script-name">${script.name}</div>
+          <button class="favorite-btn" data-script="${script.name}" style="background:none;border:none;cursor:pointer;font-size:18px;padding:0;opacity:${isFavorite ? '1' : '0.3'};" title="${isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+            ${isFavorite ? '⭐' : '☆'}
+          </button>
+        </div>
         <div class="script-details">
           <span>v${script.version}</span>
           <span>${script.duration}</span>
@@ -589,15 +917,96 @@ function renderScripts() {
   }).join('');
   
   // Update stats
-  scriptsCount.textContent = scripts.length;
+  scriptsCount.textContent = filteredScripts.length;
+  
+  // Bind favorite buttons
+  scriptsGrid.querySelectorAll('.favorite-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const scriptName = btn.dataset.script;
+      if (favoriteScripts.has(scriptName)) {
+        favoriteScripts.delete(scriptName);
+      } else {
+        favoriteScripts.add(scriptName);
+      }
+      saveFavoriteScripts();
+      renderScripts();
+    });
+  });
   
   // Also update scripts in the scripts section
   const scriptsGridSection = document.getElementById('scripts-grid-section');
   if (scriptsGridSection) {
     scriptsGridSection.innerHTML = scriptsGrid.innerHTML;
     bindScriptsSectionEvents();
+    // Rebind favorite buttons in section
+    scriptsGridSection.querySelectorAll('.favorite-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const scriptName = btn.dataset.script;
+        if (favoriteScripts.has(scriptName)) {
+          favoriteScripts.delete(scriptName);
+        } else {
+          favoriteScripts.add(scriptName);
+        }
+        saveFavoriteScripts();
+        renderScripts();
+      });
+    });
   }
 }
+
+function saveFavoriteScripts() {
+  try {
+    localStorage.setItem('appsmobs-favorites', JSON.stringify(Array.from(favoriteScripts)));
+  } catch {}
+}
+
+function loadFavoriteScripts() {
+  try {
+    const saved = localStorage.getItem('appsmobs-favorites');
+    if (saved) {
+      const favs = JSON.parse(saved);
+      favoriteScripts.clear();
+      favs.forEach(name => favoriteScripts.add(name));
+    }
+  } catch {}
+}
+
+function addToRecentScripts(scriptName) {
+  recentScripts.push({ name: scriptName, timestamp: Date.now() });
+  // Keep only last 20
+  if (recentScripts.length > 20) recentScripts.shift();
+  try {
+    localStorage.setItem('appsmobs-recent-scripts', JSON.stringify(recentScripts.slice(-10)));
+  } catch {}
+}
+
+function loadRecentScripts() {
+  try {
+    const saved = localStorage.getItem('appsmobs-recent-scripts');
+    if (saved) {
+      const recents = JSON.parse(saved);
+      recentScripts.length = 0;
+      recentScripts.push(...recents);
+    }
+  } catch {}
+}
+
+function updateFilterButtons() {
+  const buttons = ['filter-favorites', 'filter-recent', 'filter-all', 'filter-favorites-section', 'filter-recent-section', 'filter-all-section'];
+  buttons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      const isActive = (id.includes('favorites') && currentScriptFilter === 'favorites') ||
+                       (id.includes('recent') && currentScriptFilter === 'recent') ||
+                       (id.includes('all') && currentScriptFilter === 'all');
+      btn.classList.toggle('active', isActive);
+      btn.style.opacity = isActive ? '1' : '0.6';
+    }
+  });
+}
+
 let currentScriptsSectionSelection = null; // {name,file,version,duration}
 
 function bindScriptsSectionEvents() {
@@ -663,6 +1072,7 @@ async function runSelectedScriptFromScriptsSection() {
   if (selectedDevices.size === 0) { log('Sélectionnez des appareils', 'WARNING'); return; }
   const serials = Array.from(selectedDevices);
   log(`🎬 Lancement: ${currentScriptsSectionSelection.name} sur ${serials.length} appareil(s) ...`, 'INFO');
+  addToRecentScripts(currentScriptsSectionSelection.name);
   await window.electronAPI.runScriptOnDevices(currentScriptsSectionSelection.file, serials, { openViewer: false });
 }
 
@@ -863,6 +1273,29 @@ function showScrcpySelectionModal() {
   modal.classList.remove('hidden');
 }
 
+function openShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    renderKeyboardShortcuts();
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeShortcutsModal();
+      }
+    });
+  }
+}
+
+function closeShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    cancelEditingShortcut();
+  }
+}
+
 function closeScrcpyModal() {
   document.getElementById('scrcpy-modal').classList.add('hidden');
 }
@@ -927,6 +1360,7 @@ async function runScriptSelected() {
   const serials = Array.from(selectedDevices);
   log(`🎬 Lancement: ${script.name} sur ${serials.length} appareil(s) ...`, 'INFO');
   updateStatus('● Script(s) en cours...');
+  addToRecentScripts(script.name);
 
   const start = Date.now();
   serials.forEach(s => runningScripts.set(s, { name: script.name, start }));
@@ -937,6 +1371,7 @@ async function runScriptSelected() {
     if (!r.ok) {
       log(`[${r.serial}] Erreur lancement: ${r.message || 'inconnue'}`, 'ERROR');
       runningScripts.delete(r.serial);
+      pushNotification('error', 'Erreur lancement', `${r.serial}: ${r.message || 'inconnue'}`);
     }
   });
   renderDevices();
@@ -959,26 +1394,78 @@ function stopAll() {
     renderDevices();
     updateStatus('● Prêt');
     log('✅ Tous les scripts arrêtés', 'SUCCESS');
+    try {
+      pushNotification('warning', 'Tous arrêtés', 'Tous les scripts ont été arrêtés');
+      showInlineToast('warning', 'Tous arrêtés', 'Tous les scripts ont été arrêtés');
+    } catch {}
   });
 }
 
-function showReport() {
-  const report = `📊 RAPPORT APPSMOBS PRO
-${'='.repeat(50)}
-
-Appareils connectés: ${devices.length}
-Scripts chargés: ${scripts.length}
-Appareils sélectionnés: ${selectedDevices.size}
-Scripts sélectionnés: ${selectedScripts.size}
-
-Détails des appareils:
-${devices.map(d => `- ${d.serial}: ${d.status}`).join('\n')}
-
-Scripts disponibles:
-${scripts.map(s => `- ${s.name} (v${s.version})`).join('\n')}`;
-
-  log(report, 'INFO');
+async function stopSelected() {
+  if (selectedDevices.size === 0) {
+    log('Sélectionnez des appareils', 'WARNING');
+    return;
+  }
+  log('🛑 Arrêt des scripts sur la sélection...', 'WARNING');
+  for (const serial of selectedDevices) {
+    try {
+      const res = await window.electronAPI.stopScriptOnDevice(serial);
+      if (res.ok) {
+        runningScripts.delete(serial);
+        log(`[${serial}] Script arrêté`, 'SUCCESS');
+        try { pushNotification('warning', 'Script arrêté', `${serial}`); showInlineToast('warning', 'Script arrêté', `${serial}`); } catch {}
+      } else {
+        log(`[${serial}] Rien à arrêter`, 'DEBUG');
+      }
+    } catch (e) {
+      log(`[${serial}] Erreur stop: ${e?.message || e}`, 'ERROR');
+    }
+  }
+  renderDevices();
+  updateStatus('● Prêt');
 }
+
+// ==============================
+// Pause / Resume (UI-level)
+// ==============================
+function pauseSelected() {
+  if (selectedDevices.size === 0) { log('Sélectionnez des appareils', 'WARNING'); return; }
+  let count = 0;
+  for (const serial of selectedDevices) {
+    if (runningScripts.has(serial)) {
+      pausedSerials.add(serial);
+      count++;
+      try { pushNotification('warning', 'Script en pause', `${serial}`); showInlineToast('warning', 'Script en pause', `${serial}`); } catch {}
+    }
+  }
+  if (count === 0) log('Aucun script en cours à mettre en pause', 'INFO');
+}
+
+function resumeSelected() {
+  if (selectedDevices.size === 0) { log('Sélectionnez des appareils', 'WARNING'); return; }
+  let count = 0;
+  for (const serial of selectedDevices) {
+    if (pausedSerials.has(serial)) {
+      pausedSerials.delete(serial);
+      count++;
+      try { pushNotification('info', 'Reprise du script', `${serial}`); showInlineToast('info', 'Reprise du script', `${serial}`); } catch {}
+    }
+  }
+  if (count === 0) log('Aucun script en pause à reprendre', 'INFO');
+}
+
+function pauseAll() {
+  let count = 0;
+  for (const serial of runningScripts.keys()) { pausedSerials.add(serial); count++; }
+  if (count > 0) { try { pushNotification('warning', 'Pause (tous)', `${count} appareil(s)`); showInlineToast('warning', 'Pause (tous)', `${count} appareil(s)`); } catch {} }
+}
+
+function resumeAll() {
+  const count = pausedSerials.size;
+  pausedSerials.clear();
+  if (count > 0) { try { pushNotification('info', 'Reprise (tous)', `${count} appareil(s)`); showInlineToast('info', 'Reprise (tous)', `${count} appareil(s)`); } catch {} }
+}
+
 
 function filterDevices() {
   const query = (devicesSearchInput?.value || '').toLowerCase();
@@ -1063,15 +1550,42 @@ function updateStatus(message) {
 }
 
 // Settings Functions
+function setupAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+  
+  if (autoRefreshEnabled) {
+    // Refresh every 5 seconds
+    autoRefreshInterval = setInterval(() => {
+      refreshDevices();
+    }, 5000);
+  }
+}
+
 function setupSettingsListeners() {
   // Toggle switches
   const autoRefresh = document.getElementById('auto-refresh');
   const debugMode = document.getElementById('debug-mode');
   const soundAlerts = document.getElementById('sound-alerts');
+  const notificationsToggle = document.getElementById('notifications-enabled');
   
-  if (autoRefresh) autoRefresh.addEventListener('change', saveSettings);
+  if (autoRefresh) {
+    autoRefresh.addEventListener('change', (e) => {
+      autoRefreshEnabled = e.target.checked;
+      saveSettings();
+      setupAutoRefresh();
+    });
+  }
   if (debugMode) debugMode.addEventListener('change', saveSettings);
-  if (soundAlerts) soundAlerts.addEventListener('change', saveSettings);
+  if (soundAlerts) {
+    soundAlerts.addEventListener('change', (e) => {
+      soundAlertsEnabled = e.target.checked;
+      saveSettings();
+    });
+  }
+  if (notificationsToggle) notificationsToggle.addEventListener('change', saveSettings);
   
   // Dark theme toggle
   const darkThemeToggle = document.getElementById('dark-theme');
@@ -1099,8 +1613,7 @@ function setupSettingsListeners() {
     saveSettings();
   });
 
-  // Select dropdowns
-  document.getElementById('log-level').addEventListener('change', saveSettings);
+  // Select dropdowns (log-level removed)
 
   // Browse buttons
   const browseScripts = document.getElementById('browse-scripts');
@@ -1142,12 +1655,187 @@ function setupSettingsListeners() {
     }
   });
 
-  // Language select
-  const langSelect = document.getElementById('select-language');
-  if(langSelect){
-    langSelect.value = lang;
-    langSelect.onchange = e => setLang(e.target.value);
+  // Language dropdown
+  const langDropdown = document.querySelector('.language-dropdown');
+  const langDropdownHeader = document.getElementById('language-dropdown-header');
+  const langDropdownList = document.getElementById('language-dropdown-list');
+  const langDropdownTitle = document.getElementById('language-dropdown-title');
+  
+  if (langDropdownHeader && langDropdownList) {
+    langDropdownHeader.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.classList.toggle('open');
+    });
+    
+    langDropdownList.querySelectorAll('.language-dropdown-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const selectedLang = item.dataset.lang;
+        setLang(selectedLang);
+        updateLanguageDropdown();
+        langDropdown.classList.remove('open');
+      });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!langDropdown.contains(e.target)) {
+        langDropdown.classList.remove('open');
+      }
+    });
   }
+  
+  // Update check button
+  const checkUpdatesBtn = document.getElementById('check-updates-btn');
+  const downloadUpdateBtn = document.getElementById('download-update-btn');
+  const installUpdateBtn = document.getElementById('install-update-btn');
+  
+  if (checkUpdatesBtn && window.electronAPI && window.electronAPI.checkForUpdates) {
+    checkUpdatesBtn.addEventListener('click', async () => {
+      const statusEl = document.getElementById('update-status');
+      const progressEl = document.getElementById('update-progress');
+      
+      checkUpdatesBtn.disabled = true;
+      checkUpdatesBtn.textContent = '🔄 ' + t('checking_updates');
+      statusEl.style.display = 'block';
+      statusEl.textContent = t('checking_updates');
+      statusEl.style.color = '#94a3b8';
+      progressEl.style.display = 'none';
+      downloadUpdateBtn.classList.add('hidden');
+      installUpdateBtn.classList.add('hidden');
+      
+      try {
+        const res = await window.electronAPI.checkForUpdates();
+        if (!res.success) {
+          let errorMsg = res.message || t('update_error');
+          // Traduire les messages d'erreur spécifiques
+          if (errorMsg.includes('production')) {
+            errorMsg = t('update_error_production_only');
+          } else if (errorMsg.includes('désactivées') || errorMsg.includes('disabled')) {
+            errorMsg = t('update_error_disabled');
+          }
+          statusEl.textContent = errorMsg;
+          statusEl.style.color = '#fca5a5';
+          checkUpdatesBtn.disabled = false;
+          checkUpdatesBtn.textContent = '🔄 ' + t('check_for_updates');
+        }
+      } catch (e) {
+        statusEl.textContent = t('update_error') + ': ' + (e.message || 'inconnue');
+        statusEl.style.color = '#fca5a5';
+        checkUpdatesBtn.disabled = false;
+        checkUpdatesBtn.textContent = '🔄 ' + t('check_for_updates');
+      }
+    });
+    
+    // Bouton télécharger
+    if (downloadUpdateBtn && window.electronAPI && window.electronAPI.downloadUpdate) {
+      downloadUpdateBtn.addEventListener('click', async () => {
+        const statusEl = document.getElementById('update-status');
+        const progressEl = document.getElementById('update-progress');
+        statusEl.style.display = 'block';
+        statusEl.textContent = t('update_downloading');
+        statusEl.style.color = '#86efac';
+        progressEl.style.display = 'block';
+        downloadUpdateBtn.disabled = true;
+        try {
+          const res = await window.electronAPI.downloadUpdate();
+          if (!res.success) {
+            statusEl.textContent = t('update_error') + ': ' + (res.message || '');
+            statusEl.style.color = '#fca5a5';
+            downloadUpdateBtn.disabled = false;
+          }
+        } catch (e) {
+          statusEl.textContent = t('update_error') + ': ' + (e.message || '');
+          statusEl.style.color = '#fca5a5';
+          downloadUpdateBtn.disabled = false;
+        }
+      });
+    }
+    
+    // Bouton installer
+    if (installUpdateBtn && window.electronAPI && window.electronAPI.installUpdate) {
+      installUpdateBtn.addEventListener('click', async () => {
+        try {
+          await window.electronAPI.installUpdate();
+        } catch (e) {
+          const statusEl = document.getElementById('update-status');
+          statusEl.style.display = 'block';
+          statusEl.textContent = t('update_error') + ': ' + (e.message || '');
+          statusEl.style.color = '#fca5a5';
+        }
+      });
+    }
+    
+    // Listeners pour les événements de mise à jour
+    if (window.electronAPI.onUpdateAvailable) {
+      window.electronAPI.onUpdateAvailable(({ version }) => {
+        const statusEl = document.getElementById('update-status');
+        const progressEl = document.getElementById('update-progress');
+        statusEl.style.display = 'block';
+        statusEl.textContent = t('update_available_version', { version });
+        statusEl.style.color = '#86efac';
+        progressEl.style.display = 'block';
+        downloadUpdateBtn.classList.remove('hidden');
+        // Le téléchargement démarre automatiquement depuis main.js, mais on laisse aussi l'option manuelle
+      });
+    }
+    
+    if (window.electronAPI.onUpdateNotAvailable) {
+      window.electronAPI.onUpdateNotAvailable(() => {
+        const statusEl = document.getElementById('update-status');
+        checkUpdatesBtn.disabled = false;
+        checkUpdatesBtn.textContent = '🔄 ' + t('check_for_updates');
+        statusEl.style.display = 'block';
+        statusEl.textContent = t('update_not_available');
+        statusEl.style.color = '#86efac';
+        downloadUpdateBtn.classList.add('hidden');
+        installUpdateBtn.classList.add('hidden');
+      });
+    }
+    
+    if (window.electronAPI.onUpdateDownloadProgress) {
+      window.electronAPI.onUpdateDownloadProgress(({ percent }) => {
+        const progressBar = document.getElementById('update-progress-bar');
+        const progressText = document.getElementById('update-progress-text');
+        if (progressBar) progressBar.style.width = percent + '%';
+        if (progressText) progressText.textContent = percent + '%';
+      });
+    }
+    
+    if (window.electronAPI.onUpdateDownloaded) {
+      window.electronAPI.onUpdateDownloaded(({ version }) => {
+        const statusEl = document.getElementById('update-status');
+        checkUpdatesBtn.disabled = false;
+        checkUpdatesBtn.textContent = '🔄 ' + t('check_for_updates');
+        statusEl.style.display = 'block';
+        statusEl.textContent = t('update_downloaded', { version });
+        statusEl.style.color = '#86efac';
+        downloadUpdateBtn.classList.add('hidden');
+        installUpdateBtn.classList.remove('hidden');
+      });
+    }
+    
+    if (window.electronAPI.onUpdateError) {
+      window.electronAPI.onUpdateError(({ message }) => {
+        const statusEl = document.getElementById('update-status');
+        checkUpdatesBtn.disabled = false;
+        checkUpdatesBtn.textContent = '🔄 ' + t('check_for_updates');
+        statusEl.style.display = 'block';
+        let errorMsg = message || t('update_error');
+        if (errorMsg.includes('production')) {
+          errorMsg = t('update_error_production_only');
+        } else if (errorMsg.includes('désactivées') || errorMsg.includes('disabled')) {
+          errorMsg = t('update_error_disabled');
+        }
+        statusEl.textContent = errorMsg;
+        statusEl.style.color = '#fca5a5';
+        downloadUpdateBtn.classList.add('hidden');
+        installUpdateBtn.classList.add('hidden');
+      });
+    }
+  }
+  
+  updateLanguageDropdown();
 }
 
 function saveSettings() {
@@ -1155,14 +1843,15 @@ function saveSettings() {
     autoRefresh: document.getElementById('auto-refresh')?.checked ?? true,
     debugMode: document.getElementById('debug-mode')?.checked ?? false,
     soundAlerts: document.getElementById('sound-alerts')?.checked ?? true,
+    notificationsEnabled: document.getElementById('notifications-enabled')?.checked ?? true,
     darkTheme: document.getElementById('dark-theme')?.checked ?? true,
     scrcpyFps: document.getElementById('scrcpy-fps')?.value ?? 15,
     scrcpyBitrate: document.getElementById('scrcpy-bitrate')?.value ?? 8,
     scrcpyWidth: document.getElementById('scrcpy-width')?.value ?? 1080,
-    logLevel: document.getElementById('log-level')?.value ?? 'INFO',
     scriptsPath: document.getElementById('scripts-path')?.value ?? '',
     screenshotsPath: document.getElementById('screenshots-path')?.value ?? '',
-    language: document.getElementById('select-language')?.value ?? 'en' // Save selected language
+    language: lang, // Save selected language
+    shortcuts: customShortcuts // Save custom shortcuts
   };
   
   localStorage.setItem('appsmobs-settings', JSON.stringify(settings));
@@ -1172,9 +1861,23 @@ function loadSettings() {
   const saved = localStorage.getItem('appsmobs-settings');
   if (saved) {
     const settings = JSON.parse(saved);
-    document.getElementById('auto-refresh').checked = settings.autoRefresh ?? true;
-    document.getElementById('debug-mode').checked = settings.debugMode ?? false;
-    document.getElementById('sound-alerts').checked = settings.soundAlerts ?? true;
+    
+    const autoRefreshEl = document.getElementById('auto-refresh');
+    if (autoRefreshEl) autoRefreshEl.checked = settings.autoRefresh ?? true;
+    autoRefreshEnabled = settings.autoRefresh ?? true;
+    
+    if (document.getElementById('debug-mode')) document.getElementById('debug-mode').checked = settings.debugMode ?? false;
+    
+    const soundAlertsEl = document.getElementById('sound-alerts');
+    if (soundAlertsEl) soundAlertsEl.checked = settings.soundAlerts ?? true;
+    soundAlertsEnabled = settings.soundAlerts ?? true;
+    
+    const notifEl = document.getElementById('notifications-enabled');
+    if (notifEl) notifEl.checked = settings.notificationsEnabled ?? true;
+    notificationsEnabled = settings.notificationsEnabled ?? true;
+    
+    // Setup auto-refresh after loading settings
+    setupAutoRefresh();
     
     // Load dark theme (only if not disabled)
     const darkThemeToggle = document.getElementById('dark-theme');
@@ -1185,7 +1888,6 @@ function loadSettings() {
     document.getElementById('scrcpy-fps').value = settings.scrcpyFps ?? 15;
     document.getElementById('scrcpy-bitrate').value = settings.scrcpyBitrate ?? 8;
     document.getElementById('scrcpy-width').value = settings.scrcpyWidth ?? 1080;
-    document.getElementById('log-level').value = settings.logLevel ?? 'INFO';
     
     // Load path settings or use defaults
     if (settings.scriptsPath) {
@@ -1194,10 +1896,11 @@ function loadSettings() {
     if (settings.screenshotsPath) {
       document.getElementById('screenshots-path').value = settings.screenshotsPath;
     }
-    // Load language
-    if (settings.language) {
-      loadLang(settings.language);
-    }
+  // Load language
+  if (settings.language) {
+    loadLang(settings.language);
+    updateLanguageDropdown();
+  }
     
     // Update display values
     document.getElementById('fps-value').textContent = settings.scrcpyFps ?? 15;
@@ -1347,7 +2050,41 @@ function updateLicenseIndicator() {
   }
 }
 
+function updateLanguageDropdown() {
+  const langDropdownTitle = document.getElementById('language-dropdown-title');
+  const langItems = document.querySelectorAll('.language-dropdown-item');
+  
+  if (langDropdownTitle) {
+    const langNames = {
+      'en': 'English',
+      'fr': 'Français'
+    };
+    langDropdownTitle.textContent = langNames[lang] || 'English';
+  }
+  
+  langItems.forEach(item => {
+    const itemLang = item.dataset.lang;
+    item.classList.toggle('selected', itemLang === lang);
+  });
+}
+
 function updateLocalizedUI() {
+  // Update all data-i18n attributes
+  document.querySelectorAll('[data-i18n-text]').forEach(el => {
+    const key = el.getAttribute('data-i18n-text');
+    if (key) el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (key) el.title = t(key);
+  });
+  
+  updateLanguageDropdown();
+  
   // Sidebar nav labels
   const navs = [
     { selector: '.nav-card[data-section="devices"] .nav-label', key: 'dashboard' },
@@ -1381,7 +2118,7 @@ function updateLocalizedUI() {
   // Stats labels under dashboard
   const statMap = [
     {selector: '#devices-count', key: 'devices_connected'},
-    {selector: '#scripts-count', key: 'scripts_loaded'},
+    {selector: '#scripts-count', key: 'scripts_loaded_label'},
     {selector: '#running-count', key: 'active_scripts'},
     {selector: '#actions-count', key: 'available_actions'}
   ];
@@ -1407,9 +2144,24 @@ function updateLocalizedUI() {
     { selector: '#run-selected-btn .stat-label', key: 'run_on_selected' },
     { selector: '#run-all-btn .stat-label', key: 'run_on_all' },
     { selector: '#stop-all-btn .stat-label', key: 'stop_all' },
+    { selector: '#stop-selected-btn .stat-label', key: 'stop_selected' },
+    { selector: '#pause-selected-btn .stat-label', key: 'pause_selected' },
+    { selector: '#pause-all-btn .stat-label', key: 'pause_all' },
+    { selector: '#resume-selected-btn .stat-label', key: 'resume_selected' },
+    { selector: '#resume-all-btn .stat-label', key: 'resume_all' },
     { selector: '#screenshot-btn .stat-label', key: 'take_screenshot' },
     { selector: '#scrcpy-btn .stat-label', key: 'open_scrcpy' },
-    { selector: '#report-btn .stat-label', key: 'report' }
+    // Actions section buttons
+    { selector: '#run-selected-btn-section .stat-label', key: 'run_on_selected' },
+    { selector: '#run-all-btn-section .stat-label', key: 'run_on_all' },
+    { selector: '#stop-all-btn-section .stat-label', key: 'stop_all' },
+    { selector: '#stop-selected-btn-section .stat-label', key: 'stop_selected' },
+    { selector: '#pause-selected-btn-section .stat-label', key: 'pause_selected' },
+    { selector: '#pause-all-btn-section .stat-label', key: 'pause_all' },
+    { selector: '#resume-selected-btn-section .stat-label', key: 'resume_selected' },
+    { selector: '#resume-all-btn-section .stat-label', key: 'resume_all' },
+    { selector: '#screenshot-btn-section .stat-label', key: 'take_screenshot' },
+    { selector: '#scrcpy-btn-section .stat-label', key: 'open_scrcpy' }
   ];
   quickActButtonLabels.forEach(({selector, key}) => {
     const lbl = document.querySelector(selector);
@@ -1424,10 +2176,21 @@ function updateLocalizedUI() {
     const orig = h3.textContent.toLowerCase();
     if (orig.includes('actions rapides')) h3.textContent = '⚡ ' + t('quick_actions');
     if (orig.includes('scripts disponibles')) h3.textContent = '📜 ' + t('scripts_available');
-    if (orig.includes('gestion des scripts')) h3.textContent = '⚙️ ' + t('manage_scripts');
+    if (orig.includes('gestion des scripts') || orig.includes('actions')) h3.textContent = '⚡ ' + t('actions');
     if (orig.includes('détails du script')) h3.textContent = '🧾 ' + t('script_details');
     if (orig.includes('console de debug')) h3.textContent = '📝 ' + t('debug_console');
+    if (orig.includes('paramètres généraux')) h3.textContent = '⚙️ ' + t('general_settings');
+    if (orig.includes('paramètres scrcpy')) h3.textContent = '📱 ' + t('scrcpy_settings');
+    if (orig.includes('gestion licence')) h3.textContent = '🔑 ' + t('license_management');
+    if (orig.includes('paramètres avancés')) h3.textContent = '🔧 ' + t('advanced_settings');
+    if (orig.includes('appareils connectés')) h3.textContent = '📱 ' + t('devices_connected');
+    if (orig.includes('raccourcis clavier')) h3.textContent = '⌨️ ' + t('keyboard_shortcuts');
   });
+  
+  // Re-render keyboard shortcuts when language changes (only if modal is open)
+  if (document.getElementById('shortcuts-modal') && !document.getElementById('shortcuts-modal').classList.contains('hidden')) {
+    renderKeyboardShortcuts();
+  }
 
   // Playground & Save/Cancel etc
   document.querySelectorAll('.btn-label,.btn,button').forEach(btn => {
@@ -1442,7 +2205,6 @@ function updateLocalizedUI() {
     if(txt === 'arrêter tout' || txt === 'stop all') btn.textContent = t('stop_all');
     if(txt === 'capture écran') btn.textContent = t('take_screenshot');
     if(txt === 'ouvrir scrcpy') btn.textContent = t('open_scrcpy');
-    if(txt === 'rapport' || txt === 'report') btn.textContent = t('report');
     if(txt === 'effacer') btn.textContent = t('clear');
     if(txt === 'exporter') btn.textContent = t('export');
   });
@@ -1455,25 +2217,34 @@ function updateLocalizedUI() {
   const lblLang = document.getElementById('label-language');
   if(lblLang) lblLang.textContent = t('language');
   // Wire select to lang change
-  const langSelect = document.getElementById('select-language');
-  if(langSelect){
-    langSelect.value = lang;
-    langSelect.onchange = e => setLang(e.target.value);
-  }
+  updateLanguageDropdown();
   // Remplace le texte dans .stat-label sans casser le SVG
   const quickActLabels = [
     { selector: '#run-selected-btn .stat-label', key: 'run_on_selected' },
     { selector: '#run-all-btn .stat-label', key: 'run_on_all' },
     { selector: '#stop-all-btn .stat-label', key: 'stop_all' },
     { selector: '#screenshot-btn .stat-label', key: 'take_screenshot' },
-    { selector: '#scrcpy-btn .stat-label', key: 'open_scrcpy' },
-    { selector: '#report-btn .stat-label', key: 'report' }
+    { selector: '#scrcpy-btn .stat-label', key: 'open_scrcpy' }
   ];
   quickActLabels.forEach(({selector, key}) => {
     const labelEl = document.querySelector(selector);
     if(labelEl) { labelEl.textContent = t(key); labelEl.setAttribute('data-i18n-key', key); }
   });
   updateLicenseIndicator();
+  
+  // Update buttons labels
+  const checkBtn = document.getElementById('check-updates-btn');
+  if (checkBtn && !checkBtn.disabled) {
+    checkBtn.textContent = '🔄 ' + t('check_for_updates');
+  }
+  const downloadBtn = document.getElementById('download-update-btn');
+  if (downloadBtn) {
+    downloadBtn.textContent = '📥 ' + t('download_update');
+  }
+  const installBtn = document.getElementById('install-update-btn');
+  if (installBtn) {
+    installBtn.textContent = '🚀 ' + t('install_update');
+  }
 }
 
 // PATCH: Make status and key action labels fully translatable everywhere
@@ -1486,10 +2257,19 @@ function updateStatusDeviceCount(count) {
 
 // PATCH BOUTONS REFRESH
 function updateRefreshButtons() {
-  const btns = [document.getElementById('refresh-btn'), document.getElementById('control-refresh-btn')];
-  btns.forEach(btn => {
+  document.querySelectorAll('#refresh-btn, #control-refresh-btn, #header-refresh-btn').forEach(btn => {
     if (btn) {
-      btn.innerHTML = '<span class="material-symbols-outlined" style="vertical-align:middle;margin-right:3px;">refresh</span>' + t('refresh');
+      const refreshLabel = btn.querySelector('.refresh-label');
+      if (refreshLabel) {
+        refreshLabel.textContent = t('refresh');
+        refreshLabel.setAttribute('data-i18n-text', 'refresh');
+      } else {
+        // Pour le bouton header qui n'a pas de label séparé
+        const text = btn.textContent.trim();
+        if (text.includes('Actualiser') || text.includes('Refresh')) {
+          btn.innerHTML = '🔄 ' + t('refresh');
+        }
+      }
     }
   });
 }
@@ -1580,5 +2360,191 @@ function updateConsoleActionsLabels() {
   const cardH3 = document.querySelector('#console-section .card-header h3');
   if (cardH3) cardH3.innerHTML = `📝 ${t('debug_console')}`;
 }
-// Dans updateLocalizedUI() ajoute :
+// Dans updateLocalizedUI() ajoute :
+
+// Keyboard Shortcuts Functions
+function formatKeyDisplay(key) {
+  if (!key) return '';
+  return key
+    .replace('Control', 'Ctrl')
+    .replace('Meta', 'Cmd')
+    .replace('Alt', 'Alt')
+    .replace('Shift', 'Shift')
+    .replace('ArrowUp', '↑')
+    .replace('ArrowDown', '↓')
+    .replace('ArrowLeft', '←')
+    .replace('ArrowRight', '→');
+}
+
+function renderKeyboardShortcuts() {
+  const container = document.getElementById('shortcuts-container');
+  if (!container) {
+    // Container might not exist if modal is not open yet
+    return;
+  }
+  
+  const shortcutsList = [
+    { id: 'run_selected', labelKey: 'run_on_selected' },
+    { id: 'pause_selected', labelKey: 'pause_selected' },
+    { id: 'resume_selected', labelKey: 'resume_selected' },
+    { id: 'stop_all', labelKey: 'stop_all' },
+    { id: 'screenshot', labelKey: 'take_screenshot' },
+    { id: 'scrcpy', labelKey: 'open_scrcpy' },
+    { id: 'refresh_devices', labelKey: 'refresh' }
+  ];
+  
+  container.innerHTML = shortcutsList.map(item => {
+    const currentKey = customShortcuts[item.id] || defaultShortcuts[item.id]?.key;
+    const displayKey = formatKeyDisplay(currentKey);
+    
+    return `
+      <div class="shortcut-item" data-shortcut-id="${item.id}">
+        <span class="shortcut-label">${t(item.labelKey)}</span>
+        <div class="shortcut-input">
+          <div class="shortcut-key-display ${!currentKey ? 'empty' : ''}" 
+               data-shortcut-id="${item.id}"
+               title="${t('shortcut_edit')}">
+            ${displayKey || t('shortcut_edit')}
+          </div>
+          <button class="shortcut-reset-btn" data-shortcut-id="${item.id}" title="${t('shortcut_reset')}">
+            ${t('shortcut_reset')}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Attach event listeners
+  container.querySelectorAll('.shortcut-key-display').forEach(el => {
+    el.addEventListener('click', () => startEditingShortcut(el.dataset.shortcutId));
+  });
+  
+  container.querySelectorAll('.shortcut-reset-btn').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetShortcut(el.dataset.shortcutId);
+    });
+  });
+}
+
+let editingShortcutId = null;
+
+function startEditingShortcut(shortcutId) {
+  if (editingShortcutId) cancelEditingShortcut();
+  
+  editingShortcutId = shortcutId;
+  const display = document.querySelector(`.shortcut-key-display[data-shortcut-id="${shortcutId}"]`);
+  if (!display) return;
+  
+  display.classList.add('editing');
+  display.textContent = t('shortcut_recording');
+  
+  const handler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.key === 'Escape') {
+      cancelEditingShortcut();
+      document.removeEventListener('keydown', handler);
+      return;
+    }
+    
+    const modifiers = [];
+    if (e.ctrlKey) modifiers.push('Ctrl');
+    if (e.altKey) modifiers.push('Alt');
+    if (e.shiftKey) modifiers.push('Shift');
+    if (e.metaKey) modifiers.push('Meta');
+    
+    if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') {
+      return; // Wait for actual key
+    }
+    
+    const keyString = modifiers.length > 0 
+      ? `${modifiers.join('+')}+${e.key}` 
+      : e.key;
+    
+    // Check for conflicts
+    const conflict = Object.entries({...defaultShortcuts, ...customShortcuts})
+      .find(([id, data]) => {
+        if (id === shortcutId) return false;
+        const existingKey = customShortcuts[id] || defaultShortcuts[id]?.key;
+        return existingKey === keyString;
+      });
+    
+    if (conflict) {
+      showInlineToast('error', t('shortcut_conflict'), t('shortcut_conflict'));
+      cancelEditingShortcut();
+      document.removeEventListener('keydown', handler);
+      return;
+    }
+    
+    customShortcuts[shortcutId] = keyString;
+    saveSettings();
+    setupKeyboardShortcuts();
+    renderKeyboardShortcuts();
+    showInlineToast('success', t('shortcut_saved'), t('shortcut_saved'));
+    
+    document.removeEventListener('keydown', handler);
+    editingShortcutId = null;
+  };
+  
+  document.addEventListener('keydown', handler);
+}
+
+function cancelEditingShortcut() {
+  if (editingShortcutId) {
+    const display = document.querySelector(`.shortcut-key-display[data-shortcut-id="${editingShortcutId}"]`);
+    if (display) {
+      display.classList.remove('editing');
+      const currentKey = customShortcuts[editingShortcutId] || defaultShortcuts[editingShortcutId]?.key;
+      display.textContent = formatKeyDisplay(currentKey) || t('shortcut_edit');
+    }
+    editingShortcutId = null;
+  }
+}
+
+function resetShortcut(shortcutId) {
+  delete customShortcuts[shortcutId];
+  saveSettings();
+  setupKeyboardShortcuts();
+  renderKeyboardShortcuts();
+}
+
+function setupKeyboardShortcuts() {
+  // Global keyboard handler
+  document.removeEventListener('keydown', handleGlobalShortcut);
+  document.addEventListener('keydown', handleGlobalShortcut);
+}
+
+function handleGlobalShortcut(e) {
+  // Don't interfere with input fields
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+    return;
+  }
+  
+  // Don't interfere if editing a shortcut
+  if (editingShortcutId) {
+    return;
+  }
+  
+  const modifiers = [];
+  if (e.ctrlKey) modifiers.push('Ctrl');
+  if (e.altKey) modifiers.push('Alt');
+  if (e.shiftKey) modifiers.push('Shift');
+  if (e.metaKey) modifiers.push('Meta');
+  
+  const keyString = modifiers.length > 0 
+    ? `${modifiers.join('+')}+${e.key}` 
+    : e.key;
+  
+  // Check custom shortcuts first, then defaults
+  for (const [id, def] of Object.entries(defaultShortcuts)) {
+    const shortcutKey = customShortcuts[id] || def.key;
+    if (shortcutKey === keyString) {
+      e.preventDefault();
+      def.action();
+      return;
+    }
+  }
+}
 updateConsoleActionsLabels();

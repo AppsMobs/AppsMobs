@@ -24,6 +24,7 @@
       const br = document.getElementById('btn-redo'); if(br) br.textContent = `↷ ${ti('redo')}`;
       const bp = document.getElementById('btn-preview'); if(bp) bp.textContent = `👁️ ${ti('preview')}`;
       const bs = document.getElementById('btn-save'); if(bs) bs.textContent = `💾 ${ti('save')}`;
+      const bsc = document.getElementById('btn-screenshot'); if(bsc) bsc.textContent = `📸 ${ti('capture_ecran')}`;
       const ss = document.getElementById('save-status'); if(ss) ss.textContent = ti('unsaved');
       const lc = document.getElementById('line-count'); if(lc) lc.textContent = ti('line_col', { line: 1, col: 1 });
       const sh = document.querySelector('.status-right .status-item span:last-child'); if(sh) sh.textContent = ti('shortcuts');
@@ -123,7 +124,7 @@
       });
 
       const initialCode = `"""
-Script personnalisé pour BootyBot
+Script personnalisé pour AppsMobs
 Modifiez la fonction my_script() pour créer votre automatisation
 """
 
@@ -441,17 +442,13 @@ def my_script(android_client, serial):
 
   const bScreen = document.getElementById('btn-screenshot');
   if (bScreen) {
-    try { console.log('[Playground] btn-screenshot trouvé'); } catch {}
     bScreen.addEventListener('click', handleScreenshotClick);
-  } else {
-    try { console.warn('[Playground] btn-screenshot introuvable au chargement'); } catch {}
   }
   // Délégation au cas où l'écouteur direct est manqué (bubbling + capture)
   document.addEventListener('click', (e) => {
     try {
       const t = e.target;
       if (t && (t.id === 'btn-screenshot' || (t.closest && t.closest('#btn-screenshot')))) {
-        console.log('[Playground] Délégation: clic détecté sur btn-screenshot');
         handleScreenshotClick();
       }
     } catch {}
@@ -459,7 +456,6 @@ def my_script(android_client, serial):
   // Raccourci de secours: F9 déclenche capture
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F9') {
-      console.log('[Playground] Raccourci F9 → capture');
       handleScreenshotClick();
     }
   });

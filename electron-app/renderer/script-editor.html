@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self' blob:; font-src 'self' data:; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self' blob:; font-src 'self' data:; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Éditeur de Script Visual - AppsMobs Pro</title>
@@ -540,8 +540,8 @@
           <div class="block-desc">Nettoyer cache app</div>
         </div>
         <div class="block-btn" data-action="screenshot">
-          <div class="block-title">Capture d'écran</div>
-          <div class="block-desc">Prendre une photo</div>
+          <div class="block-title" data-i18n-text="capture_screenshot">Capture d'écran</div>
+          <div class="block-desc" data-i18n-text="block_screenshot_desc">Prendre une photo</div>
         </div>
       </div>
 
@@ -583,7 +583,7 @@
           <button class="btn-action btn-redo" id="btn-redo">
             ↷ Rétablir
           </button>
-          <button class="btn-action btn-preview" id="btn-screenshot">📸 Capture écran</button>
+          <button class="btn-action btn-preview" id="btn-screenshot" data-i18n-text="capture_ecran">📸 Capture écran</button>
           <button class="btn-action btn-preview" id="btn-docs">📖 Docs</button>
           <button class="btn-action btn-save" id="btn-save">
             💾 Sauvegarder

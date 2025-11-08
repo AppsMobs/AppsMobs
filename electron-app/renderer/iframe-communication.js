@@ -1,5 +1,4 @@
 // Communication avec l'iframe script-editor
-console.log('Chargement du script de communication...');
 
 // Garde pour éviter le double-binding
 if (!window.__iframeHandlersBound) {
@@ -33,8 +32,6 @@ if (!window.__iframeHandlersBound) {
 
 // Attendre que l'iframe soit chargée
 document.getElementById('script-editor-iframe').addEventListener('load', function() {
-  console.log('Iframe script-editor chargée');
-  
   // Dès le chargement, pousser la liste si disponible
   try {
     const serials = (window.currentDeviceSerials || []);
@@ -46,5 +43,3 @@ document.getElementById('script-editor-iframe').addEventListener('load', functio
     }
   } catch {}
 });
-
-console.log('Script de communication chargé');

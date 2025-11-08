@@ -1,5 +1,5 @@
 """
-Script personnalisé pour BootyBot - Création automatique de comptes Gmail
+Script personnalisé pour AppsMobs - Création automatique de comptes Gmail
 """
 import random
 import os

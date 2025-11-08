@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
 
-APP = FastAPI(title="BootyBot Licence Server", version="1.0.0")
+APP = FastAPI(title="AppsMobs Licence Server", version="1.0.0")
 APP.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,7 +22,7 @@ APP.add_middleware(
 )
 
 
-DATA_DIR = Path(os.getenv("BOOTYBOT_LICENSE_DATA", "license_server_data"))
+DATA_DIR = Path(os.getenv("APPSMOBS_LICENSE_DATA", "license_server_data"))
 try:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 except Exception:
@@ -305,7 +305,7 @@ def admin_create(req: AdminCreateRequest, token: Optional[str] = None):
 
 @APP.get("/")
 def root():
-    return {"name": "BootyBot Licence Server", "status": "ok"}
+    return {"name": "AppsMobs Licence Server", "status": "ok"}
 
 
 # --------------------------- Admin Listing --------------------------------
@@ -358,7 +358,7 @@ def admin_dashboard(token: Optional[str] = None):
         )
 
     html = (
-        "<html><head><meta charset='utf-8'><title>BootyBot Admin</title>"
+        "<html><head><meta charset='utf-8'><title>AppsMobs Admin</title>"
         "<style>body{font-family:Segoe UI,Arial; margin:20px;} table{border-collapse:collapse;width:100%;}"
         "th,td{border:1px solid #ddd;padding:8px;} th{background:#f3f3f3;text-align:left;} code{font-family:Consolas,monospace;}</style>"
         "</head><body>"

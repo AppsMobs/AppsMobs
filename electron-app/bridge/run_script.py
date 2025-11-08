@@ -5,6 +5,8 @@ import importlib.util
 import time
 from pathlib import Path
 
+SCRIPT_DONE_MARKER = "[APPSMOBS_SCRIPT_DONE]"
+
 
 def main():
     if len(sys.argv) < 3:
@@ -30,6 +32,14 @@ def main():
             timestamp = time.strftime("%H:%M:%S")
             print(f"[{timestamp}] [bridge] {message}", flush=True)
 
+    def finish():
+        """Marque explicitement la fin de script et termine le processus."""
+        try:
+            print(SCRIPT_DONE_MARKER, flush=True)
+        except Exception:
+            pass
+        sys.exit(0)
+
     # Exécute le script Python pour un device donné.
     # Compatibilité maximale:
     # 1) Si le fichier expose une fonction `run(serial)` ou `main(serial)`, on l'appelle directement
@@ -46,8 +56,14 @@ def main():
         if spec and spec.loader:
             mod = importlib.util.module_from_spec(spec)
             # Injection des helpers Core dans l'espace global du script avant exécution
+            injected = { 'finish': finish }
             try:
                 from core import log, log_step
+                injected['log'] = log
+                injected['log_step'] = log_step
+            except Exception as _inj_log:
+                log_bridge(f"Avertissement: log helpers indisponibles ({_inj_log}).")
+            try:
                 from core.android_functions import (
                     click, doubleclick, swipe,
                     write, back, home, entre, switch,
@@ -63,9 +79,7 @@ def main():
                     toggle_airplane_mode, clear_cache, restart_app, screenshot,
                     wait,
                 )
-                injected = {
-                    'log': log,
-                    'log_step': log_step,
+                injected.update({
                     # Contrôles
                     'click': click,
                     'doubleclick': doubleclick,
@@ -110,10 +124,11 @@ def main():
                     'screenshot': screenshot,
                     # Attente simple
                     'wait': wait,
-                }
-                mod.__dict__.update(injected)
+                })
             except Exception as _inj_err:
-                log_bridge(f"Avertissement: injection Core indisponible ({_inj_err}). Les scripts devront importer explicitement.")
+                log_bridge(f"Avertissement: injection Core partielle ({_inj_err}). Les scripts devront importer explicitement certaines fonctions.")
+            # Toujours injecter au moins finish
+            mod.__dict__.update(injected)
 
             spec.loader.exec_module(mod)  # type: ignore
             func = None

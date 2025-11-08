@@ -1,4 +1,4 @@
-# BootyBot - Requirements
+# AppsMobs - Requirements
 # Application de contrôle Android via scrcpy et ADB
 
 # Gestion du streaming Android

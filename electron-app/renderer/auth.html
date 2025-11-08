@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https: http:; img-src 'self' data: blob: file:; style-src 'self' 'unsafe-inline';">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self';">
-    <title>Authentification - AppsMobs</title>
+    <title>Authentification - AppsMobs Pro</title>
     <style>
         * {
             margin: 0;
@@ -44,18 +43,25 @@
         }
 
         .auth-logo {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 12px auto;
-            border-radius: 14px;
-            overflow: hidden;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px auto;
+            border-radius: 16px;
+            overflow: visible;
             box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+            background: rgba(30, 41, 59, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
         }
         .auth-logo img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .auth-title {
@@ -226,15 +232,19 @@
 </head>
 <body>
     <div class="auth-container">
+        <div style="position:absolute;top:14px;right:14px;display:flex;gap:8px;align-items:center;">
+            <button id="auth-lang-en" class="auth-link" style="padding:4px 8px;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:rgba(2,6,23,.35);backdrop-filter:blur(6px);cursor:pointer;">EN</button>
+            <button id="auth-lang-fr" class="auth-link" style="padding:4px 8px;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:rgba(2,6,23,.35);backdrop-filter:blur(6px);cursor:pointer;">FR</button>
+        </div>
         <div class="auth-header">
-            <div class="auth-logo"><img src="../../assets/icons/Logo.png" alt="AppsMobs" /></div>
+            <div class="auth-logo"><img id="authLogo" alt="AppsMobs" style="display:block;width:100%;height:100%;object-fit:contain;" /></div>
             <h1 class="auth-title">AppsMobs</h1>
-            <p class="auth-subtitle">Authentification requise</p>
+            <p class="auth-subtitle" data-i18n-text="auth_subtitle">Authentification requise</p>
         </div>
 
-        <div class="offline-mode" id="offlineMode">
-            <strong>Mode hors ligne détecté</strong><br>
-            Vous pouvez utiliser l'application en mode démo
+        <div class="offline-mode hidden" id="offlineMode">
+            <strong data-i18n-text="offline_detected">Mode hors ligne détecté</strong><br>
+            <span data-i18n-text="offline_hint">Vérifiez votre connexion internet avant de réessayer.</span>
         </div>
 
         <div class="error-message" id="errorMessage"></div>
@@ -242,58 +252,63 @@
 
         <form id="authForm">
             <div class="form-group">
-                <label class="form-label" for="email">Email</label>
+                <label class="form-label" for="email" data-i18n-text="email">Email</label>
                 <input 
                     type="email" 
                     id="email" 
                     class="form-input" 
                     placeholder="votre@email.com"
+                    data-i18n-placeholder="email_placeholder"
                     required
                 >
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="licenseKey">Clé de licence</label>
+                <label class="form-label" for="licenseKey" data-i18n-text="license_key">Clé de licence</label>
                 <input 
                     type="text" 
                     id="licenseKey" 
                     class="form-input" 
                     placeholder="Votre clé de licence"
+                    data-i18n-placeholder="license_placeholder"
                     required
                 >
             </div>
 
+            <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                <input type="checkbox" id="rememberMe" style="width:16px;height:16px;">
+                <label for="rememberMe" class="form-label" style="margin:0;" data-i18n-text="remember_me">Se souvenir de moi</label>
+            </div>
+
             <button type="submit" class="auth-button" id="authButton">
-                <span id="buttonText">Se connecter</span>
+                <span id="buttonText" data-i18n-text="sign_in">Se connecter</span>
                 <div class="loading-spinner" id="loadingSpinner"></div>
             </button>
         </form>
 
         <a href="https://www.appsmobs.com/pricing" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-top:8px;margin-bottom:10px;">
-            <button class="auth-button" type="button" style="background:linear-gradient(90deg,#34d399,#22c55e);color:#062312;box-shadow:0 8px 16px rgba(34,197,94,.25), inset 0 0 0 1px rgba(255,255,255,.08);margin-bottom:8px;">
+            <button class="auth-button" type="button" style="background:linear-gradient(90deg,#34d399,#22c55e);color:#062312;box-shadow:0 8px 16px rgba(34,197,94,.25), inset 0 0 0 1px rgba(255,255,255,.08);margin-bottom:8px;" data-i18n-text="buy_license">
                 Acheter une licence
             </button>
         </a>
 
         <a href="https://www.appsmobs.com/signup" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-bottom:6px;">
-            <button class="auth-button" type="button" style="background:linear-gradient(90deg,#60a5fa,#a78bfa);color:#071524;box-shadow:0 8px 16px rgba(99,102,241,.25), inset 0 0 0 1px rgba(255,255,255,.08);">
+            <button class="auth-button" type="button" style="background:linear-gradient(90deg,#60a5fa,#a78bfa);color:#071524;box-shadow:0 8px 16px rgba(99,102,241,.25), inset 0 0 0 1px rgba(255,255,255,.08);" data-i18n-text="sign_up">
                 S'inscrire
             </button>
         </a>
 
         <div class="auth-links">
-            <a href="#" class="auth-link" id="demoMode">Mode démo</a>
-            <span style="margin: 0 10px; color: #64748b;">|</span>
-            <a href="#" class="auth-link" id="helpLink">Aide</a>
+            <a href="#" class="auth-link" id="helpLink" data-i18n-text="help">Aide</a>
         </div>
 
         <div class="license-info">
-            <h4>💡 Informations sur les licences</h4>
+            <h4 data-i18n-text="license_info_title">💡 Informations sur les licences</h4>
             <ul>
-                <li><strong>Plan Pro:</strong> Accès complet à toutes les fonctionnalités</li>
-                <li><strong>Plan Team:</strong> Fonctionnalités avancées + support prioritaire</li>
-                <li>Vos données sont chiffrées et sécurisées</li>
-                <li>Connexion SSL/TLS avec le serveur</li>
+                <li data-i18n-text="info_pro"><strong>Plan Pro:</strong> Accès complet à toutes les fonctionnalités</li>
+                <li data-i18n-text="info_team"><strong>Plan Team:</strong> Fonctionnalités avancées + support prioritaire</li>
+                <li data-i18n-text="info_security">Vos données sont chiffrées et sécurisées</li>
+                <li data-i18n-text="info_ssl">Connexion SSL/TLS avec le serveur</li>
             </ul>
         </div>
     </div>

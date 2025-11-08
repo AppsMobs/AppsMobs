@@ -100,3 +100,6 @@ Même avec le code source visible :
 
 **Conclusion** : Vous pouvez garder un repo public pour marketing, même avec du code source, car la vraie valeur est dans l'exécutable distribué et les licences.
 
+
+
+

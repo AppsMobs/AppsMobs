@@ -1,16 +1,140 @@
 {
-  "name": "appsmobs-pro",
-  "version": "1.0.0",
+  "name": "AppsMobs",
+  "productName": "AppsMobs",
+  "version": "1.1.13",
   "private": true,
   "main": "main.js",
   "type": "module",
+  "author": {
+    "name": "AppsMobs Corp.",
+    "email": "support@appsmobs.com"
+  },
+  "description": "AppsMobs - Outil de gestion et automatisation Android",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --enable-logging"
+    "dev": "electron . --enable-logging",
+    "prepare-build": "node prepare_build.js",
+    "fix-winCodeSign": "powershell -ExecutionPolicy Bypass -File fix_winCodeSign.ps1",
+    "build": "npm run prepare-build && npm run fix-winCodeSign && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder",
+    "build:win": "npm run prepare-build && npm run fix-winCodeSign && set CSC_IDENTITY_AUTO_DISCOVERY=false && timeout /t 2 /nobreak >nul && electron-builder --win",
+    "build:win:portable": "npm run prepare-build && npm run fix-winCodeSign && set CSC_IDENTITY_AUTO_DISCOVERY=false && timeout /t 2 /nobreak >nul && electron-builder --win portable",
+    "build:win:nsis": "npm run prepare-build && npm run fix-winCodeSign && set CSC_IDENTITY_AUTO_DISCOVERY=false && timeout /t 2 /nobreak >nul && electron-builder --win nsis",
+    "dist": "npm run prepare-build && npm run fix-winCodeSign && set CSC_IDENTITY_AUTO_DISCOVERY=false && timeout /t 2 /nobreak >nul && electron-builder --publish=never"
+  },
+  "build": {
+    "appId": "com.appsmobs.pro",
+    "productName": "AppsMobs Pro",
+    "copyright": "Copyright © 2025 AppsMobs",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "bridge/run_script_wrapper.py",
+      "bridge/__pycache__/**/*",
+      "utils/**/*",
+      "assets/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "../assets/icons",
+        "to": "assets/icons",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "config.production.json",
+        "to": "config.json",
+        "filter": [
+          "config.production.json"
+        ]
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "../assets/icons",
+        "to": "assets/icons",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../assets/scrcpy",
+        "to": "assets/scrcpy",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../scripts",
+        "to": "scripts",
+        "filter": [
+          "**/*.py"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "../assets/icons/Logo.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AppsMobs",
+      "installerIcon": "../assets/icons/Logo.ico",
+      "uninstallerIcon": "../assets/icons/Logo.ico",
+      "installerHeaderIcon": "../assets/icons/Logo.ico",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "menuCategory": "Development",
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${arch}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "AppsMobs",
+        "repo": "AppsMobs"
+      }
+    ],
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "bridge/run_script_wrapper.py",
+      "bridge/__pycache__/**/*",
+      "assets/**/*"
+    ]
   },
   "devDependencies": {
-    "electron": "^31.3.1"
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.7"
   }
 }
-
-

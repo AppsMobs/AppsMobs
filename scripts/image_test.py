@@ -1,5 +1,5 @@
 """
-Script personnalisé pour BootyBot
+Script personnalisé pour AppsMobs
 Modifiez la fonction my_script() pour créer votre automatisation
 """
 

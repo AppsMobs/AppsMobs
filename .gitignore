@@ -193,3 +193,10 @@ website/*_RECAPTCHA*.md
 website/SEO_GUIDE.md
 website/CHAT_AI_IMPROVEMENTS.md
 
+# --- Release packaging output ---
+dist_public/
+
+# Exclude release executables (too large for GitHub, use GitHub Releases instead)
+releases/*.exe
+
+.github/workflows/*.yml

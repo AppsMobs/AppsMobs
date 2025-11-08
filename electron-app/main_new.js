@@ -171,6 +171,43 @@ function createWindow() {
 
 // IPC handlers pour communiquer avec le renderer
 const runningProcs = new Map(); // key: serial, value: ChildProcess
+
+function safeSend(sender, channel, payload){
+  try { if (sender && typeof sender.isDestroyed === 'function' && !sender.isDestroyed()) sender.send(channel, payload); } catch {}
+}
+
+function broadcast(channel, payload){
+  try {
+    const { BrowserWindow } = require('electron');
+    (BrowserWindow.getAllWindows() || []).forEach(win => {
+      try { if (win && win.webContents && !win.webContents.isDestroyed()) win.webContents.send(channel, payload); } catch {}
+    });
+  } catch {}
+}
+
+function killChildProcess(child) {
+  try {
+    if (!child || !child.pid) return;
+    const pid = child.pid;
+    if (process.platform === 'win32') {
+      try { spawn('taskkill', ['/PID', String(pid), '/T', '/F'], { shell: false, windowsHide: true }); } catch {}
+    } else {
+      try { process.kill(-pid, 'SIGKILL'); } catch {}
+      try { child.kill('SIGKILL'); } catch {}
+    }
+  } catch {}
+}
+
+function isProcessAlive(child) {
+  try {
+    if (!child) return false;
+    if (child.exitCode !== null) return false;
+    if (typeof child.pid === 'number') {
+      try { process.kill(child.pid, 0); return true; } catch { return false; }
+    }
+  } catch {}
+  return false;
+}
 ipcMain.handle('get-devices', async () => {
   return new Promise((resolve) => {
     const adb = spawn('adb', ['devices'], { shell: false });
@@ -262,6 +299,16 @@ ipcMain.handle('run-script-on-devices', async (event, { scriptFile, serials, opt
 
   console.log('[run-script] Starting scripts:', scriptFile, 'on devices:', serials);
 
+  // Pre-clean zombie entries (process finished but still in map)
+  try {
+    for (const [s, child] of runningProcs.entries()) {
+      if (!child || child.exitCode !== null) {
+        try { child && child.kill(); } catch {}
+        runningProcs.delete(s);
+      }
+    }
+  } catch {}
+
   for (const serial of serials) {
     try {
       // Validation de sécurité: format du serial (format ADB valide)
@@ -270,10 +317,11 @@ ipcMain.handle('run-script-on-devices', async (event, { scriptFile, serials, opt
         continue;
       }
 
-      // Évite doublons
+      // Forcer remplacement: s'il existe, on tue et on relance proprement
       if (runningProcs.has(serial)) {
-        results.push({ serial, ok: false, message: 'Déjà en cours' });
-        continue;
+        const existing = runningProcs.get(serial);
+        try { existing && existing.kill(); } catch {}
+        runningProcs.delete(serial);
       }
 
       const py = getPythonCommand();
@@ -297,6 +345,7 @@ ipcMain.handle('run-script-on-devices', async (event, { scriptFile, serials, opt
       const child = spawn(py, args, { 
         cwd: path.join(__dirname, '..'), 
         shell: false,
+        windowsHide: process.platform === 'win32',
         env: { 
           ...process.env, 
           ADB_SERIAL: serial,
@@ -304,22 +353,52 @@ ipcMain.handle('run-script-on-devices', async (event, { scriptFile, serials, opt
         }
       });
       runningProcs.set(serial, child);
+      // Inform renderer this serial is now running
+      const runningMsg = { serial, status: 'running' };
+      safeSend(event.sender, 'script-status', runningMsg);
+      broadcast('script-status', runningMsg);
+      child.on('error', (err) => {
+        console.error(`[run-script] spawn error for ${serial}:`, err);
+        try { runningProcs.delete(serial); } catch {}
+        try { event.sender.send('script-status', { serial, status: 'stopped', error: String(err) }); } catch {}
+      });
 
       let stdoutData = '';
       let stderrData = '';
 
       child.stdout?.on('data', (d) => {
         stdoutData += d.toString();
-        event.sender.send('script-log', { serial, line: d.toString() });
+        const pl = { serial, line: d.toString() };
+        safeSend(event.sender, 'script-log', pl);
+        broadcast('script-log', pl);
       });
       child.stderr?.on('data', (d) => {
         stderrData += d.toString();
-        event.sender.send('script-log', { serial, line: d.toString(), level: 'ERROR' });
+        const pl = { serial, line: d.toString(), level: 'ERROR' };
+        safeSend(event.sender, 'script-log', pl);
+        broadcast('script-log', pl);
+      });
+      // Cleanup on exit and close to be robust on Windows
+      child.on('exit', (code) => {
+        console.log(`[run-script] (exit) Process for ${serial} exited with code ${code}`);
+        runningProcs.delete(serial);
+        const exitMsg = { serial, code: code || 0 };
+        const stopMsg = { serial, status: 'stopped', code: code || 0 };
+        safeSend(event.sender, 'script-exit', exitMsg);
+        safeSend(event.sender, 'script-status', stopMsg);
+        broadcast('script-exit', exitMsg);
+        broadcast('script-status', stopMsg);
       });
       child.on('close', (code) => {
         console.log(`[run-script] Process for ${serial} exited with code ${code}`);
         runningProcs.delete(serial);
-        event.sender.send('script-exit', { serial, code: code || 0 });
+        const exitMsg = { serial, code: code || 0 };
+        const stopMsg = { serial, status: 'stopped', code: code || 0 };
+        safeSend(event.sender, 'script-exit', exitMsg);
+        safeSend(event.sender, 'script-status', stopMsg);
+        // Also broadcast stopped status so UI can re-enable actions
+        broadcast('script-exit', exitMsg);
+        broadcast('script-status', stopMsg);
       });
 
       results.push({ serial, ok: true });
@@ -334,10 +413,28 @@ ipcMain.handle('run-script-on-devices', async (event, { scriptFile, serials, opt
 
 ipcMain.handle('stop-all-scripts', async () => {
   for (const [serial, child] of runningProcs.entries()) {
-    try { child.kill(); } catch {}
+    try { killChildProcess(child); } catch {}
     runningProcs.delete(serial);
   }
   return { ok: true };
+});
+
+// Stop a single device's running script
+ipcMain.handle('stop-script-on-device', async (_event, serial) => {
+  if (!serial || typeof serial !== 'string' || !/^[a-zA-Z0-9:._-]+$/.test(serial)) {
+    return { ok: false, message: 'Invalid serial' };
+  }
+  const child = runningProcs.get(serial);
+  if (!child) {
+    return { ok: false, message: 'No running script for device' };
+  }
+  try {
+    killChildProcess(child);
+    runningProcs.delete(serial);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, message: String(e) };
+  }
 });
 
 ipcMain.handle('capture-screenshot', async (event, payload) => {

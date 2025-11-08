@@ -44,6 +44,16 @@
         <div id="lic-remaining" style="font-weight:700;font-size:1.1rem;">-</div>
       </div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;margin-top:16px;">
+      <div>
+        <div style="color:#94a3b8;font-size:.9rem;">Code Referral</div>
+        <div id="referral-code" style="font-weight:700;font-size:1.1rem;color:#60a5fa;font-family:monospace;">-</div>
+      </div>
+      <div>
+        <div style="color:#94a3b8;font-size:.9rem;">Jetons disponibles</div>
+        <div id="tokens-count" style="font-weight:700;font-size:1.1rem;color:#a78bfa;">-</div>
+      </div>
+    </div>
     <div class="profile-actions" style="display:flex;gap:12px;justify-content:flex-end;margin-top:14px;">
       <a href="https://www.appsmobs.com/pricing" target="_blank" rel="noopener">
         <button type="button" class="btn btn-gradient" style="border-radius:9999px;padding:12px 18px;background:linear-gradient(90deg,#34d399,#22c55e);color:#062312;">🔁 Renouveler</button>
@@ -53,42 +63,236 @@
   
 </div>
 <script>
-  (function(){
-    function getAuthEmail(){
-      try{ const saved = localStorage.getItem('appsMobs_auth'); if(saved){ const d = JSON.parse(saved); return d.email || ''; } }catch{}
-      return '';
-    }
+  (async function(){
     const root = document.currentScript.parentElement;
-    const emailEl = root.querySelector('#email');
-    if (emailEl) emailEl.value = getAuthEmail();
     
-    // Charger infos licence
-    (async () => {
+    // Charger les informations de licence (sécurisé - pas de données sensibles)
+    async function loadLicenseInfo() {
       try {
-        const saved = localStorage.getItem('appsMobs_auth');
-        if (saved) {
-          const d = JSON.parse(saved);
-          if (d.email && d.licenseKey && window.electronAPI && window.electronAPI.verifyLicense) {
-            const res = await window.electronAPI.verifyLicense(d.email, d.licenseKey);
-            if (res && res.success) {
-              const planEl = root.querySelector('#lic-plan');
-              const remEl = root.querySelector('#lic-remaining');
-              if (planEl) planEl.textContent = (res.plan || '-').toUpperCase();
-              if (remEl) {
-                if (res.expires_at) {
-                  const now = Math.floor(Date.now()/1000);
-                  const days = Math.max(0, Math.floor((res.expires_at - now) / 86400));
-                  remEl.textContent = `${days} jour(s)`;
-                } else {
-                  remEl.textContent = '-';
-                }
+        console.log('[Profile] Chargement des informations de licence...');
+        if (window.electronAPI && window.electronAPI.getLicenseInfo) {
+          console.log('[Profile] Appel getLicenseInfo...');
+          const licRes = await window.electronAPI.getLicenseInfo();
+          console.log('[Profile] Données licence reçues:', licRes);
+          
+          const planEl = root.querySelector('#lic-plan');
+          const remEl = root.querySelector('#lic-remaining');
+          
+          if (licRes && licRes.success) {
+            // Afficher le plan (seulement le nom du plan, pas de clé)
+            if (planEl) {
+              if (licRes.plan) {
+                // Normaliser le plan (peut être en minuscules depuis Supabase)
+                const planName = String(licRes.plan).toUpperCase();
+                planEl.textContent = planName;
+                planEl.style.color = planName === 'PRO' ? '#60a5fa' : planName === 'TEAM' ? '#a78bfa' : '#94a3b8';
+              } else {
+                planEl.textContent = '-';
+                planEl.style.color = '#94a3b8';
               }
+            }
+            
+            // Calculer et afficher les jours restants (sécurisé - seulement le nombre de jours)
+            if (remEl) {
+              if (licRes.expires_at) {
+                // expires_at peut être un timestamp Unix (secondes) ou une date
+                let expiresTimestamp = licRes.expires_at;
+                if (typeof expiresTimestamp === 'string') {
+                  // Si c'est une date string, la convertir
+                  expiresTimestamp = Math.floor(new Date(expiresTimestamp).getTime() / 1000);
+                } else if (expiresTimestamp > 1000000000000) {
+                  // Si c'est en millisecondes, convertir en secondes
+                  expiresTimestamp = Math.floor(expiresTimestamp / 1000);
+                }
+                
+                const now = Math.floor(Date.now() / 1000);
+                const days = Math.max(0, Math.floor((expiresTimestamp - now) / 86400));
+                
+                console.log('[Profile] Calcul jours restants:', { expiresTimestamp, now, days });
+                
+                if (days > 0) {
+                  remEl.textContent = `${days} jour${days > 1 ? 's' : ''}`;
+                  remEl.style.color = days > 7 ? '#86efac' : days > 3 ? '#fbbf24' : '#fca5a5';
+                } else {
+                  remEl.textContent = 'Expiré';
+                  remEl.style.color = '#fca5a5';
+                }
+              } else {
+                remEl.textContent = '-';
+                remEl.style.color = '#94a3b8';
+              }
+            }
+          } else {
+            // Pas de licence trouvée
+            if (planEl) { planEl.textContent = '-'; planEl.style.color = '#94a3b8'; }
+            if (remEl) { remEl.textContent = '-'; remEl.style.color = '#94a3b8'; }
+          }
+        } else {
+          console.warn('[Profile] API getLicenseInfo non disponible');
+          const planEl = root.querySelector('#lic-plan');
+          const remEl = root.querySelector('#lic-remaining');
+          if (planEl) { planEl.textContent = '-'; planEl.style.color = '#94a3b8'; }
+          if (remEl) { remEl.textContent = '-'; remEl.style.color = '#94a3b8'; }
+        }
+      } catch (e) {
+        console.error('Erreur chargement licence:', e);
+        const planEl = root.querySelector('#lic-plan');
+        const remEl = root.querySelector('#lic-remaining');
+        if (planEl) { planEl.textContent = '-'; planEl.style.color = '#94a3b8'; }
+        if (remEl) { remEl.textContent = '-'; remEl.style.color = '#94a3b8'; }
+      }
+    }
+    
+    // Charger le profil depuis Supabase (sécurisé - seulement les données nécessaires)
+    async function loadProfile() {
+      try {
+        console.log('[Profile] Chargement du profil...');
+        if (!window.electronAPI || !window.electronAPI.getUserProfile) {
+          console.error('[Profile] API non disponible');
+          // Fallback: essayer de charger l'email depuis la licence
+          await loadEmailFromLicense();
+          return;
+        }
+        
+        console.log('[Profile] Appel getUserProfile...');
+        const res = await window.electronAPI.getUserProfile();
+        console.log('[Profile] Réponse getUserProfile:', res);
+        if (res && res.success && res.profile) {
+          const profile = res.profile;
+          console.log('[Profile] Profil reçu:', profile);
+          const firstNameEl = root.querySelector('#firstName');
+          const lastNameEl = root.querySelector('#lastName');
+          const emailEl = root.querySelector('#email');
+          const countryEl = root.querySelector('#country');
+          
+          // Afficher les données du profil (sécurisé - seulement les champs nécessaires)
+          if (firstNameEl) firstNameEl.value = profile.first_name || '';
+          if (lastNameEl) lastNameEl.value = profile.last_name || '';
+          if (emailEl) emailEl.value = profile.email || '';
+          if (countryEl) countryEl.value = profile.country || '';
+          
+          // Afficher le code referral et les jetons
+          const referralCodeEl = root.querySelector('#referral-code');
+          const tokensCountEl = root.querySelector('#tokens-count');
+          
+          if (referralCodeEl) {
+            const referralCode = profile.referral_code || profile.referralCode || '-';
+            console.log('[Profile] Code referral:', referralCode);
+            referralCodeEl.textContent = referralCode;
+            if (referralCode !== '-') {
+              referralCodeEl.style.color = '#60a5fa';
+              referralCodeEl.style.cursor = 'pointer';
+              referralCodeEl.title = 'Cliquez pour copier';
+              // Supprimer les anciens listeners pour éviter les doublons
+              const newEl = referralCodeEl.cloneNode(true);
+              referralCodeEl.parentNode.replaceChild(newEl, referralCodeEl);
+              newEl.addEventListener('click', () => {
+                navigator.clipboard.writeText(referralCode).then(() => {
+                  const original = newEl.textContent;
+                  newEl.textContent = '✓ Copié!';
+                  setTimeout(() => {
+                    newEl.textContent = original;
+                  }, 2000);
+                }).catch(() => {});
+              });
+            } else {
+              referralCodeEl.style.color = '#94a3b8';
+            }
+          }
+          
+          if (tokensCountEl) {
+            const tokens = profile.tokens || profile.credits || profile.jetons || 0;
+            console.log('[Profile] Jetons:', tokens);
+            tokensCountEl.textContent = typeof tokens === 'number' ? tokens.toLocaleString() : String(tokens || '0');
+            tokensCountEl.style.color = tokens > 0 ? '#a78bfa' : '#94a3b8';
+          }
+        } else if (res && res.success && !res.profile) {
+          // Profil non trouvé, récupérer l'email depuis la licence
+          await loadEmailFromLicense();
+          // Afficher "-" pour referral et tokens
+          const referralCodeEl = root.querySelector('#referral-code');
+          const tokensCountEl = root.querySelector('#tokens-count');
+          if (referralCodeEl) { referralCodeEl.textContent = '-'; referralCodeEl.style.color = '#94a3b8'; }
+          if (tokensCountEl) { tokensCountEl.textContent = '-'; tokensCountEl.style.color = '#94a3b8'; }
+        } else {
+          // Erreur, essayer de charger l'email depuis la licence
+          await loadEmailFromLicense();
+          // Afficher "-" pour referral et tokens
+          const referralCodeEl = root.querySelector('#referral-code');
+          const tokensCountEl = root.querySelector('#tokens-count');
+          if (referralCodeEl) { referralCodeEl.textContent = '-'; referralCodeEl.style.color = '#94a3b8'; }
+          if (tokensCountEl) { tokensCountEl.textContent = '-'; tokensCountEl.style.color = '#94a3b8'; }
+        }
+      } catch (e) {
+        console.error('Erreur chargement profil:', e);
+        // En cas d'erreur, essayer de charger l'email depuis la licence
+        await loadEmailFromLicense();
+        // Afficher "-" pour referral et tokens
+        const referralCodeEl = root.querySelector('#referral-code');
+        const tokensCountEl = root.querySelector('#tokens-count');
+        if (referralCodeEl) { referralCodeEl.textContent = '-'; referralCodeEl.style.color = '#94a3b8'; }
+        if (tokensCountEl) { tokensCountEl.textContent = '-'; tokensCountEl.style.color = '#94a3b8'; }
+      }
+    }
+    
+    // Charger l'email depuis la licence (fallback sécurisé)
+    async function loadEmailFromLicense() {
+      try {
+        if (window.electronAPI && window.electronAPI.getLicenseInfo) {
+          const licRes = await window.electronAPI.getLicenseInfo();
+          if (licRes && licRes.success && licRes.email) {
+            const emailEl = root.querySelector('#email');
+            if (emailEl && !emailEl.value) {
+              emailEl.value = licRes.email;
             }
           }
         }
-      } catch {}
-    })();
-
+      } catch (e) {
+        console.error('Erreur chargement email depuis licence:', e);
+      }
+    }
+    
+    // Charger les données au démarrage (sécurisé - pas de données sensibles)
+    console.log('[Profile] ====== CHARGEMENT INITIAL DES DONNÉES ======');
+    console.log('[Profile] Vérification API disponible:', {
+      electronAPI: !!window.electronAPI,
+      getLicenseInfo: !!(window.electronAPI && window.electronAPI.getLicenseInfo),
+      getUserProfile: !!(window.electronAPI && window.electronAPI.getUserProfile)
+    });
+    
+    // Charger d'abord les infos de licence, puis le profil
+    await loadLicenseInfo();
+    await loadProfile();
+    
+    console.log('[Profile] ====== CHARGEMENT TERMINÉ ======');
+    
+    // Recharger les données toutes les 30 secondes pour les mettre à jour
+    setInterval(async () => {
+      console.log('[Profile] Rechargement automatique des données...');
+      await Promise.all([loadLicenseInfo(), loadProfile()]);
+    }, 30000);
+    
+    // Ajouter un bouton de rafraîchissement manuel
+    const renewBtn = root.querySelector('a[href*="pricing"]');
+    if (renewBtn) {
+      const refreshBtn = document.createElement('button');
+      refreshBtn.type = 'button';
+      refreshBtn.className = 'btn btn-gradient';
+      refreshBtn.style.cssText = 'border-radius:9999px;padding:12px 18px;background:linear-gradient(90deg,#60a5fa,#3b82f6);margin-right:8px;';
+      refreshBtn.textContent = '🔄 Actualiser';
+      refreshBtn.addEventListener('click', async () => {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = '🔄 Actualisation...';
+        await Promise.all([loadLicenseInfo(), loadProfile()]);
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = '🔄 Actualiser';
+      });
+      if (renewBtn.parentElement) {
+        renewBtn.parentElement.insertBefore(refreshBtn, renewBtn);
+      }
+    }
+    
+    // Gestion du formulaire
     root.querySelector('#profileForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {
@@ -97,10 +301,20 @@
         last_name: root.querySelector('#lastName').value.trim() || null,
         country: root.querySelector('#country').value.trim() || null,
       };
-      if (!payload.email) { alert('Email manquant'); return; }
-      if (!window.electronAPI || !window.electronAPI.saveUserProfile){ alert('API indisponible'); return; }
+      if (!payload.email) { 
+        alert('Email manquant'); 
+        return; 
+      }
+      if (!window.electronAPI || !window.electronAPI.saveUserProfile){ 
+        alert('API indisponible'); 
+        return; 
+      }
       const res = await window.electronAPI.saveUserProfile(payload);
-      if (res && res.success){ alert('Profil sauvegardé'); } else { alert('Erreur: ' + (res && res.message ? res.message : 'inconnue')); }
+      if (res && res.success){ 
+        alert('Profil sauvegardé avec succès'); 
+      } else { 
+        alert('Erreur: ' + (res && res.message ? res.message : 'inconnue')); 
+      }
     });
   })();
 </script>

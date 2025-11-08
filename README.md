@@ -51,22 +51,63 @@
 ### Your First Script
 
 ```python
-from core import android_functions as af
+def my_script(android_client, serial):
+    """
+    Your custom script entrypoint.
+    
+    Args:
+        android_client: Android client instance (provided by runtime)
+        serial: Device serial number
+    
+    Returns:
+        dict: {'success': bool, 'message': str, 'data': {}}
+    """
+    result = {
+        'success': False,
+        'message': '',
+        'data': {}
+    }
+    
+    try:
+        # Use helper functions provided by the runtime
+        log(serial, "Script started")
 
-# Connect to device
-client = af.connect_device()
+        # Swipe down
+        swipe_down()
+        
+        
+        # Click at coordinates
+        click(540, 960)
+        
+        
+        # Doble clic
+        doubleclick(540, 960)
+        
 
-# Click at coordinates
-af.click(client, 540, 960)
+        # Wait time -1sec
+        wait(1.0)
 
-# Swipe
-af.swipe_down(client)
+        # Find image
+        find("image.png", 0.8)
 
-# Type text
-af.write(client, "Hello AppsMobs!")
+        
 
-# Find and click image
-af.find_pos_click(client, "button.png", confidence=0.8)
+        # Type text
+        write("Hello AppsMobs!")
+        
+
+        log(serial, "Script finished successfully!")
+        result['success'] = True
+        result['message'] = f'Script executed on {serial}'
+        result['data']['device'] = serial
+    except Exception as e:
+        log(serial, f"Error: {e}", "ERROR")
+        result['success'] = False
+        result['message'] = str(e)
+        import traceback
+        result['data']['traceback'] = traceback.format_exc()
+    
+    return result
 ```
 
 ## 📋 Requirements
@@ -99,29 +140,28 @@ AppsMobs offers flexible pricing plans:
 - **[Script Examples](https://appsmobs.com/docs/scripts)** - Real-world use cases
 - **[FAQ](https://appsmobs.com/faq)** - Common questions answered
 
-## 🛠️ Core Functions
+## 🛠️ Script Functions
 
-AppsMobs provides 35+ automation functions:
+AppsMobs provides helper functions in your scripts:
 
-### Device Control
-- `click(x, y)` - Tap at coordinates
-- `swipe(from_x, from_y, to_x, to_y)` - Custom swipe
-- `back()`, `home()`, `recents()` - Navigation buttons
+### Helper Functions (Provided by Runtime)
+- `log(serial, message, level="INFO")` - Log messages
+- `wait(seconds)` - Wait/delay
+- `upswipe(android_client)` - Swipe up
+- `downswipe(android_client)` - Swipe down
 
-### Image Detection
-- `find(image_path, confidence=0.8)` - Detect image on screen
-- `find_pos_click(image_path)` - Find and click
-- Screenshot capture
+### Android Client Methods
+- `android_client.tap(x, y)` - Tap at coordinates
+- `android_client.text(text)` - Type text
+- `android_client.swipe(x1, y1, x2, y2)` - Custom swipe
+- `android_client.back()` - Back button
+- `android_client.home()` - Home button
+- `android_client.recents()` - Recents button
 
-### Text & Input
-- `write(text)` - Type text
-- `press_key(key)` - Hardware keys
-- Clipboard operations
-
-### Utilities
-- `sleep(seconds)` - Wait/delay
-- `get_screen_size()` - Device dimensions
-- `is_app_running(package)` - App status
+### Alternative: Import from core (if needed)
+```python
+from core.android_functions import tap, text, swipe
+```
 
 [View full API documentation →](https://appsmobs.com/docs/playground)
 
@@ -170,9 +210,7 @@ This GitHub repository serves as:
 - ✅ **Compiled Windows application (.exe)** - Download from [appsmobs.com/download](https://appsmobs.com/download)
 - ✅ **Example scripts** - Public examples for users
 - ✅ **Documentation** - Public guides and API reference
-- ❌ **Core application source code** - Proprietary, not available here
-- ❌ **Website source code** - Proprietary platform, not available here
-- ❌ **Build tools** - Proprietary compilation process
+
 
 **What's Public**: Documentation, examples, and marketing materials.
 **What's Private**: All source code (application + website).
@@ -189,7 +227,7 @@ This GitHub repository serves as:
 
 ## 🤝 Support & Feedback
 
-- 🐛 **Report Issues**: Use [GitHub Issues](https://github.com/VOTRE_USERNAME/appsmobs/issues)
+- 🐛 **Report Issues**: Use [GitHub Issues](https://github.com/AppsMobs/AppsMobs/issues)
 - 💬 **Get Help**: Visit [appsmobs.com/faq](https://appsmobs.com/faq)
 - 💡 **Suggest Features**: Open a feature request on GitHub
 - 📧 **Contact**: support@appsmobs.com

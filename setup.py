@@ -1,5 +1,5 @@
 """
-Script de configuration pour packager BootyBot
+Script de configuration pour packager AppsMobs
 """
 from setuptools import setup, find_packages
 from pathlib import Path

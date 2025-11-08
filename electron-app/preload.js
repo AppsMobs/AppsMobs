@@ -12,13 +12,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   readFileText: (path) => ipcRenderer.invoke('read-file-text', { path }),
   runScriptOnDevices: (scriptFile, serials, options) => ipcRenderer.invoke('run-script-on-devices', { scriptFile, serials, options }),
   stopAllScripts: () => ipcRenderer.invoke('stop-all-scripts'),
+  stopScriptOnDevice: (serial) => ipcRenderer.invoke('stop-script-on-device', serial),
   onScriptLog: (cb) => ipcRenderer.on('script-log', (_e, payload) => cb(payload)),
   onScriptExit: (cb) => ipcRenderer.on('script-exit', (_e, payload) => cb(payload)),
+  onScriptStatus: (cb) => ipcRenderer.on('script-status', (_e, payload) => cb(payload)),
   verifyLicense: (email, key) => ipcRenderer.invoke('verify-license', { email, key }),
   checkLicenseStatus: () => ipcRenderer.invoke('check-license-status'),
   chooseDirectory: () => ipcRenderer.invoke('choose-directory'),
   saveFile: (content, defaultPath) => ipcRenderer.invoke('save-file', { content, defaultPath }),
+  getUserProfile: () => ipcRenderer.invoke('get-user-profile'),
   saveUserProfile: (profile) => ipcRenderer.invoke('save-user-profile', profile),
+  getLicenseInfo: () => ipcRenderer.invoke('get-license-info'),
   deviceAction: (serial, action, value) => ipcRenderer.invoke('device-action', { serial, action, value }),
   deleteScript: (filePath) => ipcRenderer.invoke('delete-script', { filePath }),
   duplicateScript: (filePath) => ipcRenderer.invoke('duplicate-script', { filePath }),
@@ -43,4 +47,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showAlert: (title, message, type) => ipcRenderer.invoke('show-alert', title, message, type),
   showConfirm: (title, message, buttons) => ipcRenderer.invoke('show-confirm', title, message, buttons),
   createModal: (options) => ipcRenderer.invoke('create-modal', options)
+  ,
+  // Assets helper
+  getAssetPath: (relativePath) => ipcRenderer.invoke('get-asset-path', relativePath)
+  ,
+  // Config APIs
+  setLicenseServerUrl: (url) => ipcRenderer.invoke('set-license-server-url', url)
+  ,
+  // App mode APIs
+  getAppMode: () => ipcRenderer.invoke('get-app-mode'),
+  onModeChanged: (cb) => ipcRenderer.on('app-mode-changed', (_e, payload) => cb && cb(payload)),
+  
+  // Update APIs
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  onUpdateChecking: (cb) => ipcRenderer.on('update-checking', (_e) => cb && cb()),
+  onUpdateAvailable: (cb) => ipcRenderer.on('update-available', (_e, payload) => cb && cb(payload)),
+  onUpdateNotAvailable: (cb) => ipcRenderer.on('update-not-available', (_e) => cb && cb()),
+  onUpdateError: (cb) => ipcRenderer.on('update-error', (_e, payload) => cb && cb(payload)),
+  onUpdateDownloadProgress: (cb) => ipcRenderer.on('update-download-progress', (_e, payload) => cb && cb(payload)),
+  onUpdateDownloaded: (cb) => ipcRenderer.on('update-downloaded', (_e, payload) => cb && cb(payload))
 });

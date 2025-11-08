@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: file:; style-src 'self' 'unsafe-inline';">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration - AppsMobs Pro</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:20px; }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    p { color:#94a3b8; margin: 6px 0 14px; }
+    label { display:block; margin: 10px 0 6px; }
+    input[type=text] { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:#e2e8f0; }
+    .row { display:flex; gap:8px; margin-top:14px; }
+    button { flex:1; padding:10px 14px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+    .primary { background:linear-gradient(90deg,#22d3ee,#06b6d4); color:#062312; }
+    .muted { background:#1f2937; color:#e2e8f0; }
+    .error { color:#fca5a5; margin-top:10px; display:none; }
+    .ok { color:#86efac; margin-top:10px; display:none; }
+  </style>
+  </head>
+<body>
+  <div class="wrap">
+    <h1>Configuration initiale</h1>
+    <p>Veuillez renseigner l'URL de votre serveur de licence. Elle doit commencer par <strong>https://</strong>.</p>
+    <label for="licenseUrl">URL du serveur de licence</label>
+    <input id="licenseUrl" type="text" placeholder="https://votre-serveur.com/functions/v1/license" />
+    <div class="row">
+      <button class="muted" id="quitBtn">Quitter</button>
+      <button class="primary" id="saveBtn">Enregistrer</button>
+    </div>
+    <div class="error" id="err"></div>
+    <div class="ok" id="ok"></div>
+  </div>
+  <script src="config.js"></script>
+</body>
+</html>
+
