@@ -1,202 +1,87 @@
-# Python
+# Exclure TOUT sauf les fichiers essentiels listés ci-dessous
+
+# Tout le code source
+core/
+ui/
+electron-app/
+license_server/
+website/
+dashboard/
+discord-bot/
+
+# Fichiers Python
+*.py
+*.pyc
+*.pyo
+*.pyd
 __pycache__/
-*.py[cod]
-*$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
 *.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-*.exe
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Environnements virtuels
+*.egg-info/
 venv/
 env/
-ENV/
-env.bak/
-venv.bak/
+.venv/
 
-# Configuration & Secrets (NE JAMAIS COMMITER)
-config.ini
-secrets.json
-.env
-.env.local
-.env.production
-.env.development
-*.env
-config.json
-credentials.json
-
-# Logs
-*.log
-logs/
-combined.log
-error.log
-
-# Builds & Distributions
+# Fichiers de build et distribution
+build/
+dist/
 *.exe
 *.msi
 *.dmg
 *.pkg
-BootyBot.exe
-dist/
-build/
+*.spec
 *.whl
+releases/
 
-# Données temporaires
-*.tmp
-*.bak
-*.cache
-temp/
-tmp/
-*.cache
+# Fichiers de configuration et secrets
+config.json
+config.ini
+*.env
+.env*
+secrets.json
+credentials.json
 
-# Images temporaires & Screenshots
-last_frame.png
-screenshots/
-
-# Node modules (déjà géré mais on s'assure)
+# Node.js
 node_modules/
 package-lock.json
 
-# Code source propriétaire (EXCLU du repo public - modèle commercial)
-core/
-ui/
-run_app.py
-run_multi_device.py
-run_pro.py
-core/**/*
-ui/**/*
+# Fichiers de développement
+*.bat
+*.ps1
+*.sh
+*.txt
+*.log
+*.tmp
+*.bak
+*.cache
 
-# Website source code (propriétaire - plateforme de licences)
-website/
-website/**/*
+# Documentation interne (garder seulement README.md, LICENSE.md, CONTRIBUTING.md)
+*.md
+!README.md
+!LICENSE.md
+!CONTRIBUTING.md
 
-# Fichiers de développement (optionnel - peut être gardé pour docs)
-# *.bat
-# *.ps1
-# Note: Les garder pour documentation mais ne pas commit les sensibles
-*_GUIDE.md
-*_INSTRUCTIONS*.md
-*_SETUP*.md
-*_CONFIG*.md
-*_TEST*.md
-DEMARRER*.bat
-START*.bat
-RESET*.bat
-INSTALL*.bat
-TEST*.bat
-*.example
-config.env.example
-config.json.example
+# Screenshots et fichiers temporaires
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+!assets/icons/*.png
+!assets/icons/*.ico
 
-# Documentation interne/technique (garder seulement README.md et LICENSE.md)
-ANALYSE*.md
-ARCHITECTURE*.md
-PLAN*.md
-ETAPE*.md
-GUIDE*.md
-INSTRUCTIONS*.txt
-PROCÉDURE*.md
-FLUX*.md
-SOLUTION*.md
-RECAP*.md
-RÉSUMÉ*.md
-FEATURES*.md
-SECURITY*.md
-TROUVER*.md
-INTEGRATION*.md
-SETUP*.md
-QUICKSTART*.md
-DEMARRAGE*.txt
-
-# Fichiers de développement temporaires
-extract_scrcpy.py
-protect_code.py
-test_installation.py
-start_auth_system.py
-
-# Discord bot (si non utilisé en prod)
-discord-bot/
-
-# Dashboard Next.js (si non utilisé)
-dashboard/
-
-# Electron app old (garder seulement la version active)
-electron-app/main_old.js
-
-# Système
+# Fichiers système
+.DS_Store
 Thumbs.db
 desktop.ini
+.vscode/
+.idea/
 
-# Sécurité
-*.key
-*.pem
-*.p12
+# GitHub
+.github/workflows/
 
-# Website - fichiers de dev
-website/dist/
-website/node_modules/
-website/auth-backend/node_modules/
-website/auth-backend/*.log
-website/auth-backend/website/
-
-# Fichiers SQL de test (garder seulement les migrations nécessaires)
-website/auth-backend/*_TEST*.sql
-website/auth-backend/test_*.js
-website/auth-backend/*_EXAMPLE*.sql
-
-# Documentation technique interne
-website/auth-backend/*_CONFIG*.md
-website/auth-backend/*_GUIDE*.md
-website/auth-backend/*_INSTRUCTIONS*.md
-website/auth-backend/*_DEBUG*.md
-website/auth-backend/*_DEPANNAGE*.md
-website/auth-backend/*_VERIFIER*.md
-website/auth-backend/*_SOLUTION*.md
-website/auth-backend/*_MIGRER*.md
-website/auth-backend/*_ETAPES*.md
-website/auth-backend/*_AVERTISSEMENT*.md
-website/auth-backend/*_RECUPERER*.md
-website/auth-backend/*_UPDATE*.ps1
-website/auth-backend/*_CREER*.bat
-website/*_GUIDE*.md
-website/*_TEST*.md
-website/*_ETAPES*.md
-website/*_MANQUANT*.md
-website/*_RECAPTCHA*.md
-website/SEO_GUIDE.md
-website/CHAT_AI_IMPROVEMENTS.md
-
-# --- Release packaging output ---
-dist_public/
-
-# Exclude release executables (too large for GitHub, use GitHub Releases instead)
-releases/*.exe
-
-.github/workflows/*.yml
+# Autres
+*.zip
+*.tar
+*.gz

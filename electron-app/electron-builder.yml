@@ -1,7 +1,0 @@
-# Configuration electron-builder pour désactiver complètement la signature
-win:
-  sign: false
-  signDlls: false
-  forceCodeSigning: false
-  signAndEditExecutable: false
-
