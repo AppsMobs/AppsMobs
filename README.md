@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/logo_2.png?raw=true" alt="AppsMobs" width="120" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/logo_2.png?raw=true" alt="AppsMobs" width="120" />
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/tool.png?raw=true" alt="AppsMobs overview" width="800" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/tool.png?raw=true" alt="AppsMobs overview" width="800" />
 </p>
 
 <p align="center">
@@ -42,7 +42,7 @@
 - Centralized dashboard to manage all devices from one window.
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/dashboard.png?raw=true" alt="AppsMobs dashboard" width="700" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/dashboard.png?raw=true" alt="AppsMobs dashboard" width="700" />
 </p>
 
 ### 🐍 Python Scripts & 100+ Functions
@@ -64,7 +64,7 @@
 | 🤖 Vision AI   | `smart_click_yolo(class_name)`, `ai_learn_and_click()`, `vision_ai_detect()` |
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/editor.png?raw=true" alt="Script editor" width="700" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/editor.png?raw=true" alt="Script editor" width="700" />
 </p>
 
 ### 🧩 No-Code Block Editor
@@ -82,7 +82,7 @@
 - Perfect for earning apps, games, and dynamic interfaces.
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/visionAI.png?raw=true" alt="Vision AI" width="700" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/visionAI.png?raw=true" alt="Vision AI" width="700" />
 </p>
 
 ### 🎮 Device Control
@@ -92,7 +92,7 @@
 - Real-time screen view per device for monitoring and manual intervention.
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/control.png?raw=true" alt="Device control" width="700" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/control.png?raw=true" alt="Device control" width="700" />
 </p>
 
 ### 🤖 AI Assistant
@@ -158,7 +158,7 @@
 **Requirements:** Windows 10/11 (64-bit), Android device(s) with USB debugging enabled.
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/setup.png?raw=true" alt="Setup" width="600" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/setup.png?raw=true" alt="Setup" width="600" />
 </p>
 
 ---
@@ -174,8 +174,8 @@
 ---
 
 <p align="center">
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/Logo.png?raw=true" alt="AppsMobs" width="48" />
-  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/website/public/assets/logo_3.png?raw=true" alt="AppsMobs" width="48" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/Logo.png?raw=true" alt="AppsMobs" width="48" />
+  <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/logo_3.png?raw=true" alt="AppsMobs" width="48" />
 </p>
 
 <p align="center">
