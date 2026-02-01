@@ -1,0 +1,18 @@
+# =============================================================================
+# AppsMobs — Public repo: only README, LICENSE, and README assets are pushed.
+# All source code (electron-app, core, website code, etc.) is ignored.
+# =============================================================================
+
+# Ignore everything at root
+*
+
+# Allow only these files at root
+!README.md
+!LICENSE
+!.gitignore
+
+# Allow only the assets used by the README (images, logos)
+!website/
+!website/public/
+!website/public/assets/
+!website/public/assets/*
