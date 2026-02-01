@@ -141,7 +141,7 @@
 | **Pro** | €49 | 5 | Unlimited | Yes | No | Priority 48h |
 | **Ultimate** | €79 | 10 | Unlimited | Yes | Yes | Priority 24h |
 
-- Discounts for **3, 6, or 12 months** (see [appsmobs.com](https://appsmobs.com) / Shop).
+- Discounts for **3, 6, or 12 months** (see [appsmobs.com](https://appsmobs.com/shop).
 - **Enterprise** — Custom (unlimited devices, on-premise, dedicated support).
 
 *Prices are indicative; confirm on [appsmobs.com](https://appsmobs.com).*
