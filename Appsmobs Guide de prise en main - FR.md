@@ -22,8 +22,6 @@ AppsMobs est une application **Windows** qui te permet de **contrôler et automa
 
 - **Application de bureau** `AppsMobs` (Electron, Windows uniquement)
 - **Site web** (React + Vite) : vitrine, compte utilisateur, abonnement, dashboard en ligne
-- **Backend Auth** (Node + Supabase) : gestion des comptes, tokens, sécurité
-- **Base de données** : Supabase (pour les données utilisateurs, licences, etc.)
 
 ---
 
