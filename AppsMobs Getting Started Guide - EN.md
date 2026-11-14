@@ -1,638 +1,284 @@
-### AppsMobs Getting Started Guide  
-#### For new users
+# AppsMobs — Getting Started Guide
 
-> **Purpose**  
-> This guide explains **everything you need to get started**: installing AppsMobs, connecting your Android devices, creating your first automations, and managing your account / subscription.
+> Updated on 14 November 2026. The full version, with app screenshots and videos, is on the website: **https://appsmobs.com/en/docs**
 
----
+This guide takes you from installing the app to your first automated script. Allow about 30 minutes the first time.
 
-### 🧩 Understand AppsMobs in 5 minutes
+**Contents**
 
-**What is AppsMobs?**
-
-AppsMobs is a **Windows** application that lets you **control and automate Android devices** from your PC:
-
-- **Live control** via scrcpy (phone screen mirrored on your PC)
-- **Python scripts** ready for automation
-- **No-code visual editor** (blocks)
-- **Vision AI (YOLO)** to detect and click on screen elements
-- **AI assistant** to generate scripts / workflows from a natural language description
-
-**High-level ecosystem overview**
-
-- **Desktop app** `AppsMobs` (Electron, Windows only)
-- **Website** (React + Vite): marketing site, user account, subscription, online dashboard
-- **Auth backend** (Node + Supabase): account, tokens, security
-- **Database**: Supabase (user data, licenses, etc.)
+1. [AppsMobs in short](#1-appsmobs-in-short)
+2. [Install AppsMobs](#2-install-appsmobs)
+3. [Sign in and activate your license](#3-sign-in-and-activate-your-license)
+4. [Connect a phone or an emulator](#4-connect-a-phone-or-an-emulator)
+5. [A tour of the interface](#5-a-tour-of-the-interface)
+6. [Your first script](#6-your-first-script)
+7. [Build without code: blocks](#7-build-without-code-blocks)
+8. [Let an AI write your scripts](#8-let-an-ai-write-your-scripts)
+9. [Vision AI](#9-vision-ai)
+10. [Schedule scripts](#10-schedule-scripts)
+11. [Plans and license](#11-plans-and-license)
+12. [Something wrong?](#12-something-wrong)
 
 ---
 
-### 💻 Technical requirements
+## 1. AppsMobs in short
 
-**On your PC (where AppsMobs runs)**
+AppsMobs is a **Windows** app that drives Android phones and emulators from your PC: you see their screen, you control them, and you make them run scripts.
 
-- Windows **10 or 11**, 64-bit
-- Internet connection (recommended for:
-  - license activation,
-  - updates,
-  - AI features)
-- Enough disk space (Vision AI models, scripts, logs…)
+- **Devices**: phones over USB or Wi-Fi, and emulators (LDPlayer is detected on its own; BlueStacks, MEmu, Nox… work too).
+- **Scripts**: small programs that tap, swipe, look for an image or a text on screen. Write them in Python, with blocks, or have your own AI (Claude, Grok, ChatGPT…) write them.
+- **Everything runs on your PC.** ADB and scrcpy are bundled: there is nothing else to install.
 
-**On your Android devices**
-
-- 1 or more Android devices
-- **Developer mode** enabled
-- **USB debugging** enabled
-- Good quality **data USB cable(s)**  
-  *(avoid charge-only cables)*
+> AppsMobs sends real taps and real screenshots, nothing more. It does not make an account or a device "invisible". What you automate remains your responsibility.
 
 ---
 
-### 📥 Installing AppsMobs on Windows
+## 2. Install AppsMobs
 
-**Installation steps**
+**You need**: Windows 10 or 11, 64-bit (no macOS or Linux version), an Internet connection, and the email + license key you received when you bought your license.
 
-1. Go to the AppsMobs **Releases** page (GitHub or official website).
-2. Download:
-   - either the installer `AppsMobs-Setup-x64.exe` (**recommended**),
-   - or the portable version `AppsMobs-Portable-x64.exe`.
-3. Run the downloaded file:
-   - Follow the installer wizard (NSIS) if you chose the Setup version.
-   - Or simply open the folder if you use the Portable version.
-4. Start **AppsMobs** from the shortcut or executable.
+1. Download the installer from **https://appsmobs.com/en/download** (or from the [GitHub Releases](https://github.com/AppsMobs/AppsMobs/releases)). The file is named `AppsMobs-Setup-<version>-x64.exe`. A portable version also exists; if you are new, take the installer.
+2. Double-click the file.
+3. Windows will most likely show a blue screen, **"Windows protected your PC"**: the installer has no code signature yet. Click **More info**, then **Run anyway**.
+4. Follow the wizard (keep the suggested folder). A shortcut is added to the Desktop and the Start menu.
+5. Start AppsMobs: after about 3 seconds, the sign-in window appears.
 
-**Automatic updates**
+**Where your files are**: in `Documents\AppsMobs`.
 
-- AppsMobs uses **electron-updater**:
-  - On each startup, the app checks if a new version is available.
-  - If yes, it downloads and installs the update (depending on configuration).
-- You don’t need to do anything special: **letting the app auto-update** is the best option.
+| Folder | Contents |
+|---|---|
+| `Scripts` | your scripts (`.py`) and their images |
+| `Screenshots` | screenshots |
+| `VisionProjects` | your Vision AI projects |
+| `debug` | full logs |
 
----
-
-### 🔌 Connecting your first Android device
-
-**On the phone**
-
-1. Enable **Developer options**.
-2. Enable **USB debugging**.
-3. Plug the phone into the PC with a USB cable.
-4. On the phone, accept the prompt:  
-   *“Allow USB debugging for this computer?”*
-
-**In AppsMobs**
-
-1. Open **AppsMobs**.
-2. Go to the **Devices / Connection** section.
-3. AppsMobs automatically detects devices via **ADB / scrcpy**.
-4. Click on your device: a **streaming window** opens (phone screen on the PC).
-5. You can already:
-   - **click**,
-   - **swipe**,
-   - **type text**  
-   directly from the interface.
-
-**Number of devices by plan**
-
-| Plan     | Max devices |
-|----------|------------:|
-| Starter  |           1 |
-| Basic    |           2 |
-| Pro      |           5 |
-| Ultimate |          10 |
+**Updates**: at startup, the app checks for a new version and offers it to you. Nothing is downloaded without your confirmation. You can also check by hand in **Settings**.
 
 ---
 
-### 🐍 Python scripts – Advanced automation
+## 3. Sign in and activate your license
 
-**What you can do with scripts**
+1. In the sign-in window, enter your **Email** and your **License key** (copy-paste the key, with no space before or after).
+2. Tick **Remember me**: next time, the app opens straight away.
+3. Click **Sign in**. The main window opens on the **Dashboard**; the badge at the top right shows your plan and the days left.
 
-- Run **repetitive sequences**:
-  - collect rewards,
-  - navigate inside an app,
-  - perform regular checks, etc.
-- Automate **several devices in parallel** with a single script.
-- Use more than **100 built-in functions** (touch, vision, timing…).
+Already in the app? **Settings** → **License** tab → **Activate** (or **Verify License** right after a renewal).
 
----
+> Your key is personal: do not show it in a screenshot or a public message.
 
-#### 📚 AppsMobs API: overview
-
-When you write a script, you actually use the **AppsMobs API**: a set of ready-to-use Python functions that give you access to:
-
-- **Basic actions**: `tap`, `swipe`, `wait`, `input_text`, `press_back`, etc.
-- **Image-based vision**: search for images on the screen and click automatically.
-- **Advanced Vision AI (YOLO)**: object detection by class (buttons, icons, rewards…).
-- **Utilities**: logs, loops, error handling, multi-device support, etc.
-
-You don’t need to “import an external library”: in the AppsMobs editor, these functions are already available in the script environment.  
-You can focus on **your business logic** (what to do, in which order) instead of low-level ADB / vision plumbing.
+**Without a valid license**, the app is **read-only**: you can look around, but running, stopping or deleting a script is blocked. Nothing is deleted: renew and everything works again. Offline, a license already saved on the PC keeps working.
 
 ---
 
-#### 🎯 The key function `image_action(...)`
+## 4. Connect a phone or an emulator
 
-The `image_action(...)` function is a **high-level API** to perform actions based on image detection.  
-It allows you to:
+This is where beginners get stuck the most: take your time. You need **a USB cable that carries data** (not a charge-only cable).
 
-- search for **one or more images** on the screen,
-- control the **confidence threshold**,
-- **loop** until the image is found (or a limit is reached),
-- **click automatically** (single or double click),
-- **avoid a specific area**,
-- play a **sound** if the action fails multiple times.
+### Over USB (phone)
 
-Signature (for reference):
+1. **Unlock Developer options**: tap **7 times** on "Build number".
+   - Samsung: Settings → About phone → Software information → Build number
+   - Xiaomi / Redmi / POCO: Settings → About phone → MIUI version (or HyperOS version)
+   - Google Pixel: Settings → About phone → Build number
+   - Other brands: search "build number" with the Settings search bar
+
+   The message "You are now a developer!" appears.
+2. **Turn on USB debugging** in Developer options.
+   - **Xiaomi / Redmi / POCO**: also turn on **USB debugging (Security settings)**, otherwise the phone refuses taps sent from the PC.
+3. **Plug** the phone straight into the PC (avoid USB hubs), screen unlocked. If asked "Use USB for", choose **File transfer**.
+4. On the phone, accept **Allow USB debugging?** and tick **Always allow from this computer**.
+5. In AppsMobs, open the **Dashboard** (use the refresh button of the **Devices** card if needed). Your phone should show up with a green **Free** light.
+
+### Over Wi-Fi
+
+**The PC and the phone must be on the same Wi-Fi network.** On the Dashboard, click the **Wi-Fi icon** next to the refresh button of the **Devices** card.
+
+- **Android 11 and later**: on the phone, Developer options → **Wireless debugging** → **Pair device with pairing code**. In AppsMobs, the phone appears under **Phones waiting for a code**: type the 6-digit code and click **Pair**. You only do this once; after that AppsMobs reconnects it on its own.
+- **Android 10 and earlier**: plug it in over USB once, click **Switch to Wi-Fi**, then unplug. This mode does not survive a phone restart.
+
+> The cable stays the most stable option for long sessions or for the live screen on several phones.
+
+### LDPlayer emulator
+
+Start your instance, make sure local ADB connection is enabled in its settings, then open the Dashboard: the emulator shows up with a name like `emulator-5554`, labelled **Emulator**. Nothing to type.
+
+---
+
+## 5. A tour of the interface
+
+The left sidebar is split into two groups.
+
+**Workspace**
+
+- **Dashboard**: connected and free devices, running scripts, crashes in the last 24 hours. You can start a script by dragging it onto a device.
+- **Control**: pick one or more devices, see their screen live, tap, swipe, type text, change Wi-Fi or volume, run a script on several devices at once.
+- **Automation**: script scheduling. Turn this section on in **Settings** (**Enable automation**).
+
+**Create**
+
+- **Playground**: the script editor, in **Code** or **Blocks** mode.
+- **Vision AI**: train a model that recognises objects or screens (Pro plan and above).
+- **Console**: logs from the app, the scheduler and each script, with filters and export.
+
+At the bottom: **Settings** (language, live screen quality, folders, license, updates) and **Profile** (your account, your license, your referral code, Discord linking).
+
+---
+
+## 6. Your first script
+
+1. Open **Playground**, then **Or start from a blank page**. Make sure **Code** mode is on.
+2. Type:
+
+   ```python
+   log("Script started")
+   press_home()
+   wait(2)
+   log("Back on the home screen")
+   ```
+
+   No `import`: the functions are already available. `wait()` counts in **seconds**.
+3. Click **Run on** and tick your device.
+4. Click **Run** (<kbd>F5</kbd>). The **Output** panel shows your messages; **Stop** = <kbd>Shift</kbd>+<kbd>F5</kbd>.
+5. Save with <kbd>Ctrl</kbd>+<kbd>S</kbd> into `Documents\AppsMobs\Scripts`.
+
+### Tap a button from an image
+
+1. Show the button on the phone, then in the Playground: **⋯** → **Device screenshot** (<kbd>F9</kbd>). Accept opening the screenshot in Paint.
+2. In Paint: **Select** around the button only, **Crop**, then **Save as** → PNG, in the script's folder, named `button.png`.
+3. Replace the script with:
+
+   ```python
+   log("Looking for the button")
+   if tap_image("button.png", timeout=15):
+       log("Button tapped")
+   else:
+       log("Button not found after 15 seconds")
+   ```
+
+If the button has text that Android can read, no image is needed: `wait_text("Settings", timeout=15)` then `tap_text("Settings")`.
+
+### Good habits
+
+- Wait for a condition (`wait_image`, `wait_text`) rather than a fixed delay.
+- Always test the result: `if tap_image(...)`. A failure does not stop the script on its own.
+- Vary your pauses with `random_wait(1, 2)`.
+- Images are looked up in the script's folder, then in `Scripts\img`.
+- A safety guard blocks dangerous code (for example `import os`): the window "For your security, this script cannot be executed." tells you so.
+
+Every function: **https://appsmobs.com/en/docs/functions** (and in the app: **⋯** → **Function reference**).
+
+---
+
+## 7. Build without code: blocks
+
+In the Playground, switch to **Blocks** mode: you put blocks together (loop, **Find & Click**, wait, message…) and AppsMobs writes the Python for you, shown live. Pick the device and run it like a code script.
+
+| Block | Generated Python |
+|---|---|
+| Tap | `tap(540, 960)` |
+| Swipe up | `swipe_up()` |
+| Back button | `press_back()` |
+| Type text | `type_text('Your text here')` |
+| Find & Click | `tap_image("button.png", 0.85)` |
+| Wait for text | `wait_text('Text', timeout=30)` |
+
+Details: **https://appsmobs.com/en/docs/block-editor**
+
+---
+
+## 8. Let an AI write your scripts
+
+AppsMobs has **no built-in assistant** and **never asks for an API key**. Instead, the free **AppsMobs pack** teaches the app and every function, with its exact signature, to the AI you already use.
+
+1. **Get the pack**: in the Playground, on an empty script, the **Write it with Claude or Grok** card copies it to your clipboard. It is also on the [AI pack page](https://appsmobs.com/en/docs/ai-pack), together with a ready-to-import **Claude Skill**.
+2. **Give it to your AI**: paste it as the first message (Grok, ChatGPT, Gemini) or import the Skill into Claude.
+3. **Describe your script** in plain words: "Tap the green button, wait 5 seconds, then swipe up".
+4. **Paste the script** into the Playground, read it, and test it on a device.
+
+---
+
+## 9. Vision AI
+
+*Pro plan and above.* Teach the bot to find objects or recognise screens, without relying on coordinates or screen resolution.
+
+| Project type | The question | In a script |
+|---|---|---|
+| **Find objects** | "Where is the *Play* button?" | `smart_detect`, `smart_click` |
+| **Recognize the screen** | "Am I on the menu, in a fight, on an ad?" | `detect_screen`, `wait_screen` |
+
+It takes 4 steps in the **Vision AI** page: **capture** varied screens, **annotate** (AI assistants help you go faster), **train** in one click, **test** live and then fix.
 
 ```python
-image_action(
-    images=["btn.png", "btn_alt.png"],   # list with 1 or more possible images
-    conf=0.85,                           # confidence (0.0 - 1.0)
-    loop=True,                           # True = loop until success or max_attempts
-    click_mode="single",                 # "none" | "single" | "double"
-    avoid_rect=None,                     # area to avoid: ((x1, y1), (x2, y2)) or None
-    max_attempts=None,                   # global limit (None = infinite)
-    sound=False,                         # True = enable sound
-    sound_file="alarm.mp3",              # optional sound file
-    sound_every_n_attempts=None,         # e.g. 10 = play sound every 10 failed attempts
-)
+chests = smart_detect(["chest"], model="My game", conf=0.5)
+smart_click(["play_button"], model="My game")
+
+if wait_screen("fight", model="My screens", timeout=10):
+    log("In a fight")
 ```
 
-**Parameters, one by one:**
+Without a graphics card, training runs on the processor (a few minutes for a small project). With an **NVIDIA** card, the app offers to enable it (one-time download of about 2.5 GB): 5 to 20 times faster.
 
-- **`images`**:  
-  - List of reference images to look for on the screen.  
-  - Example: `["btn.png"]` or `["btn.png", "btn_alt.png"]` if your button has several variants (colors, states…).
-  - As soon as **one** image is found with sufficient confidence, the action is considered a **success**.
-
-- **`conf`** (confidence):  
-  - Confidence level **between 0.0 and 1.0**.  
-  - The closer to **1.0**, the more **precise** the match must be.  
-  - Example:
-    - `0.7` = more tolerant (accepts approximate matches),
-    - `0.9` = stricter (might miss if the image is slightly different).
-
-- **`loop`**:  
-  - If `True`: the function **loops** (takes new screenshots / runs detection) until:
-    - the image is found, or
-    - `max_attempts` is reached (if defined).  
-  - If `False`: only **one attempt** is made (useful for quick tests).
-
-- **`click_mode`**:  
-  - Controls what happens when the image is found:
-    - `"none"`  → no click, just detection (useful if you want to handle a conditional afterward).
-    - `"single"` → single click at the detected position (most common case).
-    - `"double"` → double-click at the detected position.
-
-- **`avoid_rect`**:  
-  - Lets you **define an area to avoid** on screen.  
-  - Format: `((x1, y1), (x2, y2))` → two corners of the rectangle to exclude.  
-  - Useful when:
-    - the same image appears **in multiple places**,
-    - but you want to avoid, for example, an ad corner, overlay, etc.
-
-- **`max_attempts`**:  
-  - Limits the **total number of attempts** if `loop=True`.  
-  - `None` = no limit (be careful not to block a script too long if the image never appears).  
-  - Example:
-    - `max_attempts=20` → at most 20 attempts before giving up.
-
-- **`sound`**:  
-  - If `True`: enables sound notifications when combined with `sound_every_n_attempts`.  
-  - If `False`: no sound is played.
-
-- **`sound_file`**:  
-  - Name of the **audio file** to play (e.g. `"alarm.mp3"`).  
-  - Used only if `sound=True` and `sound_every_n_attempts` is configured.
-
-- **`sound_every_n_attempts`**:  
-  - Example: `10` → plays the sound **every 10 failed attempts**.  
-  - Very useful to **alert you** when:
-    - the script runs in the background,
-    - but the image is no longer found (UI changed, bug, network issue…).
-
-In short, `image_action(...)` is your **main building block** for:
-
-- “wait for a button to appear and then click it”,
-- “retry several times until a particular icon is visible”,
-- “raise an alert if an element hasn’t appeared after X attempts”.
-
-You can use it alone or as an **internal block** inside higher-level functions (`go_to_main_menu()`, `collect_bonus()`, etc.).
+Details: **https://appsmobs.com/en/docs/vision-ai**
 
 ---
 
-#### 🧪 Mini script example: installing “AppsMobs Touch” from the Play Store
+## 10. Schedule scripts
 
-> **Script goal**  
-> - Open the Play Store  
-> - Click on the search bar  
-> - Type “AppsMobs Touch”  
-> - Click on the result / “Install” button  
-> - Use `sleep`, `print` and small `random` jitter on taps to feel more “human”
+*Basic plan and above.* Turn on **Automation** in Settings, then **New task**: choose **which script**, **when** (every 30 minutes, every day at 8 am…) and **on which devices** (any free device, with optional rotation, or specific devices).
 
-```python
-import time
-import random
+Good to know:
 
-def human_sleep(min_s=0.5, max_s=1.5):
-    """Random pause to simulate human behavior."""
-    delay = random.uniform(min_s, max_s)
-    print(f"[INFO] Sleeping for {delay:.2f}s")
-    time.sleep(delay)
+- Tasks only run **while AppsMobs is open** (minimised works). Runs missed while the PC sleeps are not caught up.
+- On several devices, the script runs on them **one after the other**.
+- A script started by a task is cut off after **5 minutes**. For longer ones, start them by hand.
 
-def human_tap(x, y, jitter=5):
-    """Tap with a small random offset around point (x, y)."""
-    dx = random.randint(-jitter, jitter)
-    dy = random.randint(-jitter, jitter)
-    final_x, final_y = x + dx, y + dy
-    print(f"[ACTION] Tap at ({final_x}, {final_y}) (jitter={jitter})")
-    tap(final_x, final_y)
-    human_sleep(0.3, 0.8)
-
-def open_play_store():
-    print("[STEP] Opening Play Store…")
-    # Example 1: via an icon on the home screen (image_action)
-    image_action(
-        images=["icons/playstore.png"],
-        conf=0.85,
-        loop=True,
-        click_mode="single",
-        max_attempts=20
-    )
-    human_sleep(2.0, 3.0)  # let the app fully load
-
-def click_search_bar():
-    print("[STEP] Clicking on the search bar…")
-    image_action(
-        images=["playstore_search_bar.png"],
-        conf=0.85,
-        loop=True,
-        click_mode="single",
-        max_attempts=15
-    )
-    human_sleep(0.8, 1.5)
-
-def type_search():
-    print('[STEP] Typing "AppsMobs Touch"…')
-    input_text("AppsMobs Touch")
-    human_sleep(0.8, 1.2)
-    # Press Enter or tap the search icon, depending on your setup
-    print("[ACTION] Validating search…")
-    press_enter()  # or use image_action on the search icon if needed
-    human_sleep(2.0, 3.0)
-
-def click_install():
-    print("[STEP] Looking for the Install button…")
-    image_action(
-        images=["btn_install.png", "btn_install_en.png"],
-        conf=0.88,
-        loop=True,
-        click_mode="single",
-        max_attempts=30,
-        sound=True,
-        sound_file="alarm.mp3",
-        sound_every_n_attempts=10
-    )
-    print("[OK] Install button clicked, installation in progress…")
-    human_sleep(3.0, 5.0)
-
-def main():
-    print("=== AppsMobs script: installing 'AppsMobs Touch' ===")
-    open_play_store()
-    click_search_bar()
-    type_search()
-    click_install()
-    print("=== Script finished ✅ ===")
-
-# Script entry point
-main()
-```
-
-> **Notes**  
-> - Image names (`icons/playstore.png`, `playstore_search_bar.png`, `btn_install.png`, etc.) must match **your own screenshots**.  
-> - The functions `tap`, `input_text`, `press_enter`, `image_action` are provided by the **AppsMobs API**.  
-> - You can tune `sleep` durations and `conf` / `max_attempts` according to your device speed and UI stability.
+Details: **https://appsmobs.com/en/docs/scheduling-and-pools**
 
 ---
 
-#### 🧱 Typical structure of an AppsMobs script
+## 11. Plans and license
 
-A “clean” script usually looks like this:
+| | Starter | Basic | Pro | Ultimate | Enterprise |
+|---|---|---|---|---|---|
+| Devices at the same time | 1 | 2 | 5 | 10 | unlimited |
+| Scheduler | — | ✓ | ✓ | ✓ | ✓ |
+| Device pools and priority support | — | — | ✓ | ✓ | ✓ |
+| Vision AI | — | — | ✓ | ✓ | ✓ |
+| Reinforcement learning | — | — | — | ✓ | ✓ |
 
-- **Imports & helpers** (reusable helper functions)
-- **Configuration** (wait times, number of loops, etc.)
-- **Action functions** (for example `collect_rewards()`, `launch_app()`)
-- **Main loop** that calls these functions
-
-General idea:
-
-1. **Use clear names** for your functions (`go_to_menu`, `click_reward`, etc.).
-2. **Don’t put everything in `main`**: split logic into small functions.
-3. Add **safety checks** (for example, ensure an image exists before clicking).
-
----
-
-#### 🧪 Key function examples
-
-- **Touch / gestures**  
-  `tap(x, y)` · `swipe(x1, y1, x2, y2)` · `long_press(x, y)`
-- **Time / wait**  
-  `wait(5)` · `wait_until_image("button.png")`
-- **Screen / image**  
-  `screenshot()` · `image_exists("icon.png")` · `click_image("button.png")`
-- **Keyboard / navigation**  
-  `input_text("Hello")` · `press_back()` · `press_home()`
-- **Vision AI** (depending on plan)  
-  `smart_click_yolo("class")` · `vision_ai_detect()`
+- Every plan: unlimited scripts and runs, block editor, **no watermark**.
+- **7-day free trial** on every plan: nothing is charged before day 8, cancel any time.
+- Pay with PayPal, card or crypto, with an invoice for every payment. Current prices: **https://appsmobs.com/en/pricing**
+- One license = **one active computer at a time** (you can move it from your account on the website).
+- Changing plan: your remaining days are converted at equal value.
 
 ---
 
-#### 📋 Example of script logic (pseudo-code)
+## 12. Something wrong?
 
-Without showing the exact code, here is the typical logic of a simple farming script:
+| Symptom | Fix |
+|---|---|
+| No device shows up | Change cable (it must transfer files), check USB debugging, choose **File transfer**, then refresh |
+| "Device Unauthorized" | Plug it in again and accept the window on the phone with **Always allow** |
+| No authorisation window | Unlock the phone; otherwise **Revoke USB debugging authorizations** and plug it in again |
+| Windows does not recognise the phone | Install the brand's USB driver (Device Manager, yellow triangle) |
+| Xiaomi: taps don't go through | Turn on **USB debugging (Security settings)** |
+| `image introuvable : button.png` (image not found) | Put the image in the script's folder or in `Scripts\img`, check the name and the `.png` |
+| The image is not found on screen | Crop tighter around the button, or lower the confidence: `tap_image("button.png", conf=0.7)` |
+| `NameError: name 'click' is not defined` | Use the real function names: `tap`, `tap_image`, `wait` |
+| "Authentication error" | Retype email and key without stray spaces |
+| Script buttons are blocked | Expired license (read-only): renew, then **Verify License** |
+| **Automation** missing from the sidebar | **Settings** → **Enable automation** |
 
-1. **Launch the target app** (via a shortcut or tap on the icon).
-2. **Wait a few seconds** for the UI to be ready.
-3. **Look for a “Collect” button** (by image or Vision AI) and click it.
-4. **Wait for the animation to finish**, close popups if needed.
-5. **Repeat** these steps in a loop (for example every X minutes).
-
-You can then:
-
-- Add a **counter** (number of cycles),
-- Log in the console what happens at each step,
-- Handle **error cases** (image not found, timeout reached, etc.).
-
----
-
-#### 📡 Multi-device scripts
-
-With AppsMobs, a script can:
-
-- run on **a single device**, or
-- be started on **multiple devices** at the same time.
-
-Best practices:
-
-- Always try to make the script **idempotent**: it should be safe to restart without breaking the app state.
-- Avoid hard-coded coordinates that ignore resolution → prefer:
-  - **image-based** search,
-  - **Vision AI**,
-  - or relative positions (for simple cases).
+Every known error message: **https://appsmobs.com/en/docs/troubleshooting**
 
 ---
 
-#### 🐞 Debug & logs
+## Go further
 
-To see what your script is doing:
+- [The Dashboard](https://appsmobs.com/en/docs/dashboard) · [Control a device](https://appsmobs.com/en/docs/control)
+- [Writing a Python script](https://appsmobs.com/en/docs/python-scripts) · [Function reference](https://appsmobs.com/en/docs/functions)
+- [Console and logs](https://appsmobs.com/en/docs/console) · [Settings](https://appsmobs.com/en/docs/settings)
+- [License, plans and account](https://appsmobs.com/en/docs/licence-and-billing)
 
-- Use **logs** (messages in the AppsMobs editor console):
-  - at the beginning of each important step,
-  - when entering or exiting a loop,
-  - when an image / AI detection fails.
-- Always start by testing:
-  - on **a single device**,
-  - with **longer delays** (`wait(3)` instead of `wait(0.5)`) while validating.
-- Once everything is stable:
-  - shorten wait times,
-  - then move to **multi-device** if your plan allows it.
-
----
-
-#### ✅ Your first script (checklist)
-
-1. Open the **script editor** in AppsMobs.
-2. Create a **new Python script**.
-3. Add:
-   - a small action function (for example tap at a fixed location),
-   - a few `wait()` calls to see the flow.
-4. Add 2–3 **logs** to follow the steps.
-5. Attach this script to **one device only** at first.
-6. Click **Run** and verify the behavior.
-7. Once satisfied, **refactor** the script (reusable functions) and, if needed, move to **multi-device**.
-
----
-
-### 🧩 No-Code editor (Blocks)
-
-**Who is it for?**
-
-- Users who **don’t want to write Python code**.
-- Quick creation of simple automations:
-  - clicks,
-  - swipes,
-  - delays,
-  - conditions,
-  - loops, etc.
-
-**How it works**
-
-- You **drag & drop** blocks:
-  - actions,
-  - conditions,
-  - loops, etc.
-- Each block corresponds to a **script function** (tap, swipe, wait…).
-- You see your workflow logic as a **visual diagram**.
-- You can then, if needed, **export to Python** for more advanced tuning or scaling.
-
----
-
-### 👁️ Vision AI (YOLO) – Automate “by sight”
-
-> **Available on some plans (Pro, Ultimate).**
-
-**Why it’s powerful**
-
-You teach AppsMobs to **recognize visual elements** on the screen (buttons, icons, rewards, etc.).  
-Instead of clicking fixed coordinates, you say:
-
-> *“Click as soon as you see THIS button.”*
-
-It is ideal when:
-
-- The UI changes frequently.
-- There is **no reliable API**.
-- You automate a **game** or a highly visual app.
-
-**How it works**
-
-1. You provide **screenshots**.
-2. You **annotate** elements to recognize (regions + class names).
-3. AppsMobs **trains a YOLO model**.
-4. In your scripts, you call for example:  
-   `smart_click_yolo("button_class_name")`
-5. The AI detects the position and **AppsMobs clicks automatically** at the right place.
-
----
-
-### 🤖 AI Assistant (Gemini, Groq, OpenAI, Claude, DeepSeek…)
-
-**What the AI assistant does**
-
-You simply describe what you want, for example:
-
-> *“Open app X, wait 5 seconds, click the green button, then swipe up every 30 seconds.”*
-
-The AI assistant generates:
-
-- either a **Python script**,
-- or a **block workflow**.
-
-**Configuration (BYOK)**
-
-- The assistant works with **BYOK – Bring Your Own Key**:
-  - Gemini, Groq, OpenAI, Claude, DeepSeek, etc.
-- You enter **your own API keys** in the AppsMobs settings.
-- **Important**:
-  - never share your keys,
-  - never paste them in public code or screenshots.
-
----
-
-### ⏰ Scheduled tasks & device pool
-
-**Task scheduler**
-
-You can tell AppsMobs:
-
-- “Run this script **every 5 minutes**”
-- or “Run this script **every day at 03:00**”
-
-Use cases:
-
-- **Automatic farming**
-- **Recurring stability tests**
-- **Monitoring** apps (state, notifications, etc.)
-
-**Device pool**
-
-- You define an available **device pool**.
-- You **assign tasks** to this pool.
-- The scheduler handles:
-  - launching the right scripts,
-  - on the right devices,
-  - in the right order.
-
----
-
-### 🌐 AppsMobs website (account, subscription, dashboard)
-
-**What you can do on the website**
-
-- **Create an account / log in**
-- **Manage your subscription**:
-  - purchase, renew, upgrade / downgrade
-- **Pay online** via:
-  - Stripe, PayPal, Binance (depending on active integrations)
-- Access your **web dashboard**:
-  - see your licenses,
-  - check subscription status,
-  - read documentation
-- Access **support & AI chat** (if enabled):
-  - FAQ,
-  - technical support,
-  - quick answers via AI.
-
-**Technical stack (for info)**
-
-- Frontend: React 18 + Vite + Tailwind CSS
-- Auth backend: Node.js + Express
-- Auth / DB: Supabase
-- Deployment: Vercel
-
----
-
-### 💳 Plans & limits
-
-| Plan     | Approx. monthly price | Devices | Scripts | Vision AI   | Support             |
-|----------|----------------------:|:--------|:--------|:------------|:--------------------|
-| Starter  | ~ €9                 | 1       | Unlimited| No          | Community           |
-| Basic    | ~ €19                | 2       | Unlimited| No          | Email (~48 h)       |
-| Pro      | ~ €49                | 5       | Unlimited| Yes         | Priority (~48 h)    |
-| Ultimate | ~ €79                | 10      | Unlimited| Yes (+ RL)  | Priority (~24 h)    |
-
-> **Note**: Exact prices, promos and bundles may change.  
-> Always refer to the official site `https://appsmobs.com`.
-
----
-
-### 🔐 Security & best practices
-
-**Account & authentication**
-
-- Use:
-  - a **valid email address**,
-  - a **strong password**:
-    - enough length,
-    - upper & lower case, digits, special characters.
-- **Never** share your password.
-- Log out from **shared PCs**.
-
-**Tokens & sessions**
-
-- Tokens are:
-  - **validated** (format, expiration),
-  - **cleaned up** automatically if invalid.
-- If you see:
-  - frequent logouts,
-  - 401 / 403 errors,  
-  log in again properly.
-
-**Payments**
-
-- Payments go through **secure platforms**:
-  - Stripe,
-  - PayPal,
-  - Binance.
-- Always check:
-  - that the URL is correct,
-  - that the site uses **HTTPS**.
-
-**AI API keys**
-
-- Never share your keys (Gemini, Groq, OpenAI, Claude, etc.).
-- Don’t put them in public code or screenshots.
-- If you suspect a leak:
-  - **regenerate the key** from the provider’s dashboard.
-
-**Updates**
-
-- Let AppsMobs update itself:
-  - you get **new features**,
-  - **bug fixes**,
-  - **security improvements**.
-
----
-
-### 🆘 Where to get help
-
-**Documentation**
-
-- Official docs: `https://docs.appsmobs.com`
-- Guides, FAQ, automation examples: **Documentation** & **Support** sections on the site
-
-**Support**
-
-- Email: `support@appsmobs.com`
-- Support level depends on your plan:
-  - Community
-  - Standard email
-  - Priority
-
-**Quick links**
-
-- Official site: `https://appsmobs.com`
-- Downloads / Releases: `https://github.com/AppsMobs/AppsMobs/releases`
-
----
-
-### ✅ Ultra-quick start summary
-
-1. **Install** AppsMobs on Windows 10/11 (Setup or Portable).
-2. **Enable USB debugging** on your Android and connect it to the PC.
-3. **Open AppsMobs** and check that the device appears with a streaming screen.
-4. Create a **first script** or a **block workflow** (tap, wait, swipe).
-5. Test it, then enable **Vision AI** if your plan allows it.
-6. Manage your **account** and **subscription** from the AppsMobs website.
-7. Let the app **auto-update** and follow basic **security best practices**.
-
+Stuck? The **AppsMobs Discord** is the fastest way to get an answer.
