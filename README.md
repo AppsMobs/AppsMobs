@@ -26,7 +26,7 @@
 
 ## 📖 What is AppsMobs?
 
-**AppsMobs** is a Windows desktop application that lets you **control and automate Android devices** from your PC. It brings everything into one tool: multi-device screen streaming (scrcpy), **Python scripts**, a **No-Code block editor**, an **AI assistant** for code generation, and **Vision AI (YOLO)** to detect on-screen elements and click them automatically.
+**AppsMobs** is a Windows desktop application that lets you **control and automate Android devices** from your PC. It brings everything into one tool: multi-device screen streaming (scrcpy), **Python scripts**, a **No-Code block editor**, an **AI pack** so Claude, Grok or ChatGPT can write your scripts, and **Vision AI (YOLO)** to detect on-screen elements and click them automatically.
 
 > **In short:** Android automation (scripts + vision AI) — all running locally on your machine, with no mandatory cloud subscription to run your automations.
 
@@ -61,7 +61,7 @@
 | 📸 Screen      | `screenshot()`, `read_text(region)`, `image_exists("icon.png")` |
 | 🎯 Find & click | `click_image("button.png")`, `find_image_and_click("reward.png")` — searches the screen for an image and clicks it |
 | ⌨️ Input       | `input_text("hello")`, `press_back()`, `press_home()` |
-| 🤖 Vision AI   | `smart_click_yolo(class_name)`, `ai_learn_and_click()`, `vision_ai_detect()` |
+| 🤖 Vision AI   | `smart_detect(["classe"], model="Projet")`, `smart_click(["classe"], model="Projet")`, `detect_screen(model="Screens")`, `wait_screen("menu", model="Screens")` |
 
 <p align="center">
   <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/editor.png?raw=true" alt="Script editor" width="700" />
@@ -79,7 +79,7 @@
 - **Train your own YOLO models** inside AppsMobs: annotate images, train, and run inference.
 - **Real-time detection** on the device screen: detect buttons, rewards, UI elements, and click them automatically.
 - When UI selectors or coordinates change, vision keeps working — no fragile XPath or pixel positions.
-- Perfect for earning apps, games, and dynamic interfaces.
+- Perfect for games, testing, and dynamic interfaces.
 
 <p align="center">
   <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/visionAI.png?raw=true" alt="Vision AI" width="700" />
@@ -95,11 +95,12 @@
   <img src="https://github.com/AppsMobs/AppsMobs/blob/main/assets/control.png?raw=true" alt="Device control" width="700" />
 </p>
 
-### 🤖 AI Assistant
+### 🤖 Write Scripts with Your Own AI
 
-- Generate Python or block workflows from a **natural language description** (e.g. *"Tap the green button, wait 5 seconds, then swipe up"*).
-- Supports **Gemini, Groq, OpenAI, Claude, DeepSeek** (bring your own API key).
-- Inline help and code suggestions in the script editor.
+- AppsMobs has no built-in assistant and never asks for an API key.
+- Instead, the **AppsMobs AI pack** teaches the app and **every function** (exact signatures, script rules) to the AI you already use: **Claude, Grok, ChatGPT, Gemini**.
+- Describe what you want in plain words (e.g. *"Tap the green button, wait 5 seconds, then swipe up"*), then paste the script into the Playground.
+- Get the pack from the Playground (**Write it with Claude or Grok** card) or from the [AI pack guide](https://appsmobs.com/en/docs/ai-pack). A ready-made **Claude Skill** is also available.
 
 ### ⏰ Scheduled Tasks & Device Pool
 
@@ -115,7 +116,7 @@
 |----------|-------------|
 | **🔗 All-in-one** | ADB, scrcpy, Python, block editor, and Vision AI in a single Windows app — no need to wire multiple tools together. |
 | **🏠 Local first** | Scripts and Vision AI run on your PC; execution does not depend on a cloud service. |
-| **🔧 Flexible** | Use Python for power users, blocks for no-code, and the AI assistant to bridge both. |
+| **🔧 Flexible** | Use Python for power users, blocks for no-code, and your own AI (with the AppsMobs pack) to write either. |
 | **👁️ Vision when it matters** | When APIs or UI trees fail, vision-based detection still finds and clicks the right elements. |
 | **✨ No watermark** | Paid plans (including Starter) ship without watermarks on your automations. |
 
@@ -125,7 +126,7 @@
 
 | Use case | Description |
 |----------|-------------|
-| **💰 Earning / farming** | Automate reward collection in apps (with or without Vision AI depending on plan). |
+| **📋 Repetitive tasks** | Automate the same taps, forms and checks you do every day on your phone. |
 | **🎮 Mobile games** | Resource farming, repetitive loops, multi-account management. |
 | **🧪 QA & testing** | Run the same scenario across several devices; schedule overnight runs. |
 | **👥 Multi-account** | Control multiple devices or accounts from one PC with one dashboard. |
@@ -168,7 +169,7 @@
 | Link | URL |
 |------|-----|
 | **🌐 Website** | [appsmobs.com](https://appsmobs.com) |
-| **📚 Documentation** | [docs.appsmobs.com](https://docs.appsmobs.com) |
+| **📚 Documentation** | [appsmobs.com/docs](https://appsmobs.com/en/docs) |
 | **📦 Releases** | [GitHub Releases](https://github.com/AppsMobs/AppsMobs/releases) |
 
 ---
