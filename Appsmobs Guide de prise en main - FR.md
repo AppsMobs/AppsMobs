@@ -249,7 +249,7 @@ Détail : **https://appsmobs.com/fr/docs/scheduling-and-pools**
 - Dans toutes les offres : scripts et exécutions illimités, éditeur en blocs, **aucun filigrane**.
 - **Essai gratuit de 7 jours** sur chaque offre : rien n'est prélevé avant le 8e jour, annulable à tout moment.
 - Paiement par PayPal, carte ou crypto, avec une facture pour chaque paiement. Prix actuels : **https://appsmobs.com/fr/pricing**
-- Une licence s'active sur **autant de PC que ta formule a d'appareils** (1, 2, 5 ou 10). Pour remplacer un PC, écris au support.
+- Une licence = **un PC**. Le nombre de ta formule (1, 2, 5 ou 10) est le nombre de téléphones que ce PC pilote en même temps. Pour changer de PC, écris au support.
 - Changer d'offre : tes jours restants sont convertis à valeur égale.
 
 ---

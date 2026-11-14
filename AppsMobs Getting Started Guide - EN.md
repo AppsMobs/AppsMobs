@@ -249,7 +249,7 @@ Details: **https://appsmobs.com/en/docs/scheduling-and-pools**
 - Every plan: unlimited scripts and runs, block editor, **no watermark**.
 - **7-day free trial** on every plan: nothing is charged before day 8, cancel any time.
 - Pay with PayPal, card or crypto, with an invoice for every payment. Current prices: **https://appsmobs.com/en/pricing**
-- A license activates on **as many PCs as your plan has devices** (1, 2, 5 or 10). To replace a PC, write to support.
+- One license = **one PC**. Your plan's number (1, 2, 5 or 10) is how many phones that PC drives at the same time. To change PC, write to support.
 - Changing plan: your remaining days are converted at equal value.
 
 ---
