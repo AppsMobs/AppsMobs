@@ -135,12 +135,12 @@
 
 ## 💳 Pricing
 
-| Plan | Price/month | Devices | Scripts | Vision AI | RL Training | Support |
-|------|-------------|---------|---------|-----------|-------------|---------|
-| **Starter** | €9 | 1 | Unlimited | No | No | Community |
-| **Basic** | €19 | 2 | Unlimited | No | No | Email 48h |
-| **Pro** | €49 | 5 | Unlimited | Yes | No | Priority 48h |
-| **Ultimate** | €79 | 10 | Unlimited | Yes | Yes | Priority 24h |
+| Plan | Price/month | Devices | Scripts | Vision AI | Support |
+|------|-------------|---------|---------|-----------|---------|
+| **Starter** | €9 | 1 | Unlimited | No | Community |
+| **Basic** | €19 | 2 | Unlimited | No | Email 48h |
+| **Pro** | €49 | 5 | Unlimited | Yes | Priority 48h |
+| **Ultimate** | €79 | 10 | Unlimited | Yes | Priority 24h |
 
 - Discounts for **3, 6, or 12 months** (see [appsmobs.com](https://appsmobs.com/shop).
 - **Enterprise** — Custom (unlimited devices, on-premise, dedicated support).

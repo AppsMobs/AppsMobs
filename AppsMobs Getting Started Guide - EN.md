@@ -244,7 +244,6 @@ Details: **https://appsmobs.com/en/docs/scheduling-and-pools**
 | Scheduler | — | ✓ | ✓ | ✓ | ✓ |
 | Device pools and priority support | — | — | ✓ | ✓ | ✓ |
 | Vision AI | — | — | ✓ | ✓ | ✓ |
-| Reinforcement learning | — | — | — | ✓ | ✓ |
 
 - Every plan: unlimited scripts and runs, block editor, **no watermark**.
 - **7-day free trial** on every plan: nothing is charged before day 8, cancel any time.

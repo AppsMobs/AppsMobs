@@ -244,7 +244,6 @@ Détail : **https://appsmobs.com/fr/docs/scheduling-and-pools**
 | Planificateur | — | ✓ | ✓ | ✓ | ✓ |
 | Pools d'appareils et support prioritaire | — | — | ✓ | ✓ | ✓ |
 | Vision IA | — | — | ✓ | ✓ | ✓ |
-| Entraînement par renforcement | — | — | — | ✓ | ✓ |
 
 - Dans toutes les offres : scripts et exécutions illimités, éditeur en blocs, **aucun filigrane**.
 - **Essai gratuit de 7 jours** sur chaque offre : rien n'est prélevé avant le 8e jour, annulable à tout moment.
