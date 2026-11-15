@@ -117,7 +117,7 @@ La barre latérale de gauche est rangée en deux groupes.
 **Créer**
 
 - **Playground** : l'éditeur de scripts, en mode **Code** ou **Blocs**.
-- **Vision IA** : entraîne un modèle qui reconnaît des objets ou des écrans (à partir de l'offre Pro).
+- **Vision IA** : entraîne un modèle qui reconnaît des objets ou des écrans (incluse dès l'offre Gratuit avec les modèles fournis ; entraîner ses propres modèles dès Joueur).
 - **Console** : les journaux de l'appli, du planificateur et de chaque script, avec filtres et export.
 
 En bas : **Paramètres** (langue, qualité de l'écran en direct, dossiers, licence, mises à jour) et **Profil** (ton compte, ta licence, ton code de parrainage, la liaison Discord).
@@ -199,7 +199,7 @@ AppsMobs n'a **pas d'assistant intégré** et ne demande **jamais de clé API**.
 
 ## 9. Vision IA
 
-*À partir de l'offre Pro.* Apprends au bot à trouver des objets ou à reconnaître l'écran, sans dépendre des coordonnées ni de la résolution.
+*Incluse dès l'offre Gratuit avec les modèles fournis ; entraîner ses propres modèles dès l'offre Joueur.* Apprends au bot à trouver des objets ou à reconnaître l'écran, sans dépendre des coordonnées ni de la résolution.
 
 | Type de projet | La question | Dans un script |
 |---|---|---|
@@ -224,7 +224,7 @@ Détail : **https://appsmobs.com/fr/docs/vision-ai**
 
 ## 10. Planifier des scripts
 
-*À partir de l'offre Basic.* Active **Automatisation** dans les Paramètres, puis **Nouvelle tâche** : choisis **quel script**, **quand** (toutes les 30 minutes, chaque jour à 8 h…) et **sur quels appareils** (n'importe lequel de libre, avec rotation possible, ou des appareils précis).
+*À partir de l'offre Joueur.* Active **Automatisation** dans les Paramètres, puis **Nouvelle tâche** : choisis **quel script**, **quand** (toutes les 30 minutes, chaque jour à 8 h…) et **sur quels appareils** (n'importe lequel de libre, avec rotation possible, ou des appareils précis).
 
 À savoir :
 
@@ -238,17 +238,22 @@ Détail : **https://appsmobs.com/fr/docs/scheduling-and-pools**
 
 ## 11. Offres et licence
 
-| | Starter | Basic | Pro | Ultimate | Enterprise |
+| | Gratuit | Joueur | Pro | Ferme | Entreprise |
 |---|---|---|---|---|---|
-| Appareils en même temps | 1 | 2 | 5 | 10 | illimité |
+| Prix | 0 € | 9 € / mois ou 90 € / an | 24 € / mois ou 240 € / an | 49 € / mois ou 490 € / an | sur devis |
+| Appareils en même temps | 1 | 3 | 10 | 30 | illimité (30+) |
+| PC | 1 | 1 | 1 | 3 | selon contrat |
+| Vision IA avec les modèles fournis | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Entraîner ses propres modèles | — | ✓ | ✓ | ✓ | ✓ |
 | Planificateur | — | ✓ | ✓ | ✓ | ✓ |
-| Pools d'appareils et support prioritaire | — | — | ✓ | ✓ | ✓ |
-| Vision IA | — | — | ✓ | ✓ | ✓ |
+| Pools d'appareils | — | — | ✓ | ✓ | ✓ |
+| Support | communauté | e-mail 48 h | prioritaire 48 h | prioritaire 24 h | dédié |
 
 - Dans toutes les offres : scripts et exécutions illimités, éditeur en blocs, **aucun filigrane**.
-- **Essai gratuit de 7 jours** sur chaque offre : rien n'est prélevé avant le 8e jour, annulable à tout moment.
+- L'offre **Gratuit** est limitée à **1 heure d'exécution de scripts par jour** (remise à zéro à minuit). Les offres payantes se prennent pour **1 mois** ou **12 mois** (12 mois = 2 mois offerts).
+- **Essai gratuit de 7 jours** sur Pro : rien n'est prélevé avant le 8e jour, annulable à tout moment.
 - Paiement par PayPal, carte ou crypto, avec une facture pour chaque paiement. Prix actuels : **https://appsmobs.com/fr/pricing**
-- Une licence = **un PC**. Le nombre de ta formule (1, 2, 5 ou 10) est le nombre de téléphones que ce PC pilote en même temps. Pour changer de PC, écris au support.
+- Une licence = **un PC** (sauf Ferme : **3 PC**). Le nombre de ta formule (1, 3, 10 ou 30) est le nombre de téléphones pilotés en même temps. Pour changer de PC, écris au support.
 - Changer d'offre : tes jours restants sont convertis à valeur égale.
 
 ---

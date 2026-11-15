@@ -117,7 +117,7 @@ The left sidebar is split into two groups.
 **Create**
 
 - **Playground**: the script editor, in **Code** or **Blocks** mode.
-- **Vision AI**: train a model that recognises objects or screens (Pro plan and above).
+- **Vision AI**: train a model that recognises objects or screens (included from the Free plan with the provided models; training your own models from Player).
 - **Console**: logs from the app, the scheduler and each script, with filters and export.
 
 At the bottom: **Settings** (language, live screen quality, folders, license, updates) and **Profile** (your account, your license, your referral code, Discord linking).
@@ -199,7 +199,7 @@ AppsMobs has **no built-in assistant** and **never asks for an API key**. Instea
 
 ## 9. Vision AI
 
-*Pro plan and above.* Teach the bot to find objects or recognise screens, without relying on coordinates or screen resolution.
+*Included from the Free plan with the provided models; training your own models from Player.* Teach the bot to find objects or recognise screens, without relying on coordinates or screen resolution.
 
 | Project type | The question | In a script |
 |---|---|---|
@@ -224,7 +224,7 @@ Details: **https://appsmobs.com/en/docs/vision-ai**
 
 ## 10. Schedule scripts
 
-*Basic plan and above.* Turn on **Automation** in Settings, then **New task**: choose **which script**, **when** (every 30 minutes, every day at 8 am…) and **on which devices** (any free device, with optional rotation, or specific devices).
+*Player plan and above.* Turn on **Automation** in Settings, then **New task**: choose **which script**, **when** (every 30 minutes, every day at 8 am…) and **on which devices** (any free device, with optional rotation, or specific devices).
 
 Good to know:
 
@@ -238,17 +238,22 @@ Details: **https://appsmobs.com/en/docs/scheduling-and-pools**
 
 ## 11. Plans and license
 
-| | Starter | Basic | Pro | Ultimate | Enterprise |
+| | Free | Player | Pro | Farm | Enterprise |
 |---|---|---|---|---|---|
-| Devices at the same time | 1 | 2 | 5 | 10 | unlimited |
+| Price | €0 | €9 / month or €90 / year | €24 / month or €240 / year | €49 / month or €490 / year | on quote |
+| Devices at the same time | 1 | 3 | 10 | 30 | unlimited (30+) |
+| PCs | 1 | 1 | 1 | 3 | per contract |
+| Vision AI with the provided models | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Train your own models | — | ✓ | ✓ | ✓ | ✓ |
 | Scheduler | — | ✓ | ✓ | ✓ | ✓ |
-| Device pools and priority support | — | — | ✓ | ✓ | ✓ |
-| Vision AI | — | — | ✓ | ✓ | ✓ |
+| Device pools | — | — | ✓ | ✓ | ✓ |
+| Support | community | email 48 h | priority 48 h | priority 24 h | dedicated |
 
 - Every plan: unlimited scripts and runs, block editor, **no watermark**.
-- **7-day free trial** on every plan: nothing is charged before day 8, cancel any time.
+- The **Free** plan is limited to **1 hour of script running per day** (reset at midnight). Paid plans are sold for **1 month** or **12 months** (12 months = 2 months free).
+- **7-day free trial** on Pro: nothing is charged before day 8, cancel any time.
 - Pay with PayPal, card or crypto, with an invoice for every payment. Current prices: **https://appsmobs.com/en/pricing**
-- One license = **one PC**. Your plan's number (1, 2, 5 or 10) is how many phones that PC drives at the same time. To change PC, write to support.
+- One license = **one PC** (except Farm: **3 PCs**). Your plan's number (1, 3, 10 or 30) is how many phones are driven at the same time. To change PC, write to support.
 - Changing plan: your remaining days are converted at equal value.
 
 ---

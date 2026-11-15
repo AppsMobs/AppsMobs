@@ -118,7 +118,7 @@
 | **🏠 Local first** | Scripts and Vision AI run on your PC; execution does not depend on a cloud service. |
 | **🔧 Flexible** | Use Python for power users, blocks for no-code, and your own AI (with the AppsMobs pack) to write either. |
 | **👁️ Vision when it matters** | When APIs or UI trees fail, vision-based detection still finds and clicks the right elements. |
-| **✨ No watermark** | Paid plans (including Starter) ship without watermarks on your automations. |
+| **✨ No watermark** | Paid plans (including Player) ship without watermarks on your automations. |
 
 ---
 
@@ -135,15 +135,15 @@
 
 ## 💳 Pricing
 
-| Plan | Price/month | Devices | Scripts | Vision AI | Support |
-|------|-------------|---------|---------|-----------|---------|
-| **Starter** | €9 | 1 | Unlimited | No | Community |
-| **Basic** | €19 | 2 | Unlimited | No | Email 48h |
-| **Pro** | €49 | 5 | Unlimited | Yes | Priority 48h |
-| **Ultimate** | €79 | 10 | Unlimited | Yes | Priority 24h |
+| Plan | Price/month | Devices | PCs | Scripts | Vision AI | Support |
+|------|-------------|---------|-----|---------|-----------|---------|
+| **Free** | €0 | 1 | 1 | Unlimited (1 h/day) | Provided models only | Community |
+| **Player** | €9 | 3 | 1 | Unlimited | Yes, train your own models | Email 48h |
+| **Pro** | €24 | 10 | 1 | Unlimited | Yes | Priority 48h |
+| **Farm** | €49 | 30 | 3 | Unlimited | Yes | Priority 24h |
 
-- Discounts for **3, 6, or 12 months** (see [appsmobs.com](https://appsmobs.com/shop).
-- **Enterprise** — Custom (unlimited devices, on-premise, dedicated support).
+- Terms of **1 or 12 months**; 12 months = 2 months free (€90 / €240 / €490 per year), see [appsmobs.com](https://appsmobs.com/shop).
+- **Enterprise** — Custom (30+ devices, on-premise, dedicated support).
 
 *Prices are indicative; confirm on [appsmobs.com](https://appsmobs.com).*
 
