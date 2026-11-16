@@ -57,10 +57,10 @@
 | Category       | Examples |
 |----------------|----------|
 | 👆 Touch       | `tap(x, y)`, `swipe(x1, y1, x2, y2)`, `long_press(x, y)` |
-| ⏱️ Wait        | `wait(seconds)`, `wait_until_image("button.png")` |
-| 📸 Screen      | `screenshot()`, `read_text(region)`, `image_exists("icon.png")` |
-| 🎯 Find & click | `click_image("button.png")`, `find_image_and_click("reward.png")` — searches the screen for an image and clicks it |
-| ⌨️ Input       | `input_text("hello")`, `press_back()`, `press_home()` |
+| ⏱️ Wait        | `wait(seconds)`, `wait_image("button.png")`, `wait_text("OK")` |
+| 📸 Screen      | `screenshot()`, `ocr_screen(region)`, `image_visible("icon.png")` |
+| 🎯 Find & tap  | `tap_image("button.png")` — waits for an image on screen and taps it; `find_image("reward.png")` gives its position |
+| ⌨️ Input       | `type_text("hello")`, `press_back()`, `press_home()` |
 | 🤖 Vision AI   | `smart_detect(["classe"], model="Projet")`, `smart_click(["classe"], model="Projet")`, `detect_screen(model="Screens")`, `wait_screen("menu", model="Screens")` |
 
 <p align="center">
